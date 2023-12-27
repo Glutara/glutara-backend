@@ -17,7 +17,7 @@ type PostRepository interface {
 type repo struct{}
 
 const (
-	projectId      string = "golang-interview-e94e8"
+	projectId      string = "glutara"
 	collectionName string = "posts"
 )
 
