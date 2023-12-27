@@ -1,34 +1,53 @@
 package middleware
 
 import (
+	"encoding/json"
 	"net/http"
 	"fmt"
+	"math/rand"
+
+	"glutara/repository"
+	"glutara/models"
 )
 
-// TODO :
-// Response format
-
 // Create a global instance of Repo
-// SetRepo sets the instance of Repo
+var (
+	repo repository.PostRepository = repository.NewPostRepository() 
+)
 
 // MainHandler for dummy test
-func MainHandler(w http.ResponseWriter, r *http.Request) {
-	// Allow all origin to handle cors issue
-	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-	fmt.Fprintf(w, "Hello, Welcome to Glutara Web Service!")
+func MainHandler(response http.ResponseWriter, request *http.Request) {
+	fmt.Fprintf(response, "Hello, Welcome to Glutara Web Service!")
 }
 
-// MainHandler for dummy test
-func AboutHandler(w http.ResponseWriter, r *http.Request) {
-	// Allow all origin to handle cors issue
-	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+// Get all the posts from the firestore
+func GetPosts(response http.ResponseWriter , request *http.Request) {
+	response.Header().Set("Content-Type", "application/json")
+	posts, err := repo.FindAll()
+	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
+		response.Write([]byte(`{"error" : "Error Getting the Posts"}`))
+		return
+	}
 
-	fmt.Fprintf(w, "About Glutara")
+	response.WriteHeader(http.StatusOK)
+	json.NewEncoder(response).Encode(posts)
+}
+
+// Add a new post to the firestore
+func AddPost(response http.ResponseWriter , request *http.Request) {
+	response.Header().Set("Content-Type", "application/json")
+	var post models.Post
+	err:= json.NewDecoder(request.Body).Decode(&post)
+	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
+		response.Write([]byte(`{"error" : "Error Unmarshalling Data"}`))
+		return
+	}
+
+	post.ID = rand.Int63()
+	repo.Save(&post)
+
+	response.WriteHeader(http.StatusOK)
+	json.NewEncoder(response).Encode(post)
 }
