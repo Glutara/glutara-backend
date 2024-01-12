@@ -1,5 +1,8 @@
-# Glutara Backend
-> Backend Repository for Glutara App
+<div align="center"><img src = "assets/glutara.png" width = 20% height= 20%></div>
+
+<div align="center">
+An IOT-based system with non-invasive wearable Continuous Glucose Monitor (CGM) for diabetic people
+</div>
 
 ## Table of Contents
 
