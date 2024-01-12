@@ -12,7 +12,7 @@ import (
 
 // Create a global instance of Repo
 var (
-	repo repository.PostRepository = repository.NewPostRepository() 
+	postRepo repository.PostRepository = repository.NewPostRepository() 
 )
 
 // MainHandler for dummy test
@@ -23,7 +23,7 @@ func MainHandler(response http.ResponseWriter, request *http.Request) {
 // Get all the posts from the firestore
 func GetPosts(response http.ResponseWriter , request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
-	posts, err := repo.FindAll()
+	posts, err := postRepo.FindAll()
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
 		response.Write([]byte(`{"error" : "Error Getting the Posts"}`))
@@ -41,12 +41,12 @@ func AddPost(response http.ResponseWriter , request *http.Request) {
 	err:= json.NewDecoder(request.Body).Decode(&post)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
-		response.Write([]byte(`{"error" : "Error Unmarshalling Data"}`))
+		response.Write([]byte(`{"Error" : "Error Unmarshalling Data"}`))
 		return
 	}
 
 	post.ID = rand.Int63()
-	repo.Save(&post)
+	postRepo.Save(&post)
 
 	response.WriteHeader(http.StatusOK)
 	json.NewEncoder(response).Encode(post)

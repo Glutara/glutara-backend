@@ -7,6 +7,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"google.golang.org/api/iterator"
 	"glutara/models"
+	"glutara/config"
 )
 
 type PostRepository interface {
@@ -16,11 +17,6 @@ type PostRepository interface {
 
 type repo struct{}
 
-const (
-	projectId      string = "glutara"
-	collectionName string = "posts"
-)
-
 // NewPostRepository
 func NewPostRepository() PostRepository {
 	return &repo{}
@@ -28,7 +24,7 @@ func NewPostRepository() PostRepository {
 
 func (*repo) Save(post *models.Post) (*models.Post, error) {
 	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectId)
+	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
 		log.Fatalf("Failed to Create a Firestore Client: %v", err)
@@ -36,7 +32,7 @@ func (*repo) Save(post *models.Post) (*models.Post, error) {
 	}
 
 	defer client.Close()
-	_, _, err = client.Collection(collectionName).Add(ctx, map[string]interface{} {
+	_, _, err = client.Collection(config.PostCollection).Add(ctx, map[string]interface{} {
 		"ID":    post.ID,
 		"Title": post.Title,
 		"Text":  post.Text,
@@ -52,7 +48,7 @@ func (*repo) Save(post *models.Post) (*models.Post, error) {
 
 func (*repo) FindAll() ([]models.Post, error) {
 	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectId)
+	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
 		log.Fatalf("Failed to Create a Firestore Client: %v", err)
@@ -62,7 +58,7 @@ func (*repo) FindAll() ([]models.Post, error) {
 	defer client.Close()
 	var posts []models.Post
 
-	itr := client.Collection(collectionName).Documents(ctx)
+	itr := client.Collection(config.PostCollection).Documents(ctx)
 	for {
 		doc, err := itr.Next()
 		if err == iterator.Done {
