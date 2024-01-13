@@ -18,6 +18,7 @@ func Router() *mux.Router {
 	router.HandleFunc("/api/{UserID}/reminders", middleware.GetReminders).Methods("GET")
 	router.HandleFunc("/api/{UserID}/reminders", middleware.CreateReminder).Methods("POST")
 	router.HandleFunc("/api/{UserID}/reminders/{ReminderID}", middleware.DeleteReminder).Methods("DELETE")
+	router.HandleFunc("/api/{UserID}/reminders/{ReminderID}", middleware.UpdateReminder).Methods("PUT")
 	
 	return router
 }

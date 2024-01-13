@@ -82,3 +82,34 @@ func DeleteReminder(response http.ResponseWriter, request *http.Request) {
 	}
 	response.WriteHeader(http.StatusOK)
 }
+
+func UpdateReminder(response http.ResponseWriter, request *http.Request) {
+	response.Header().Set("Content-Type", "application/json")
+	var reminder models.Reminder
+	vars := mux.Vars(request)
+	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
+	if err != nil {
+		http.Error(response, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+	reminderID, err := strconv.ParseInt(vars["ReminderID"], 10, 64)
+	if err != nil {
+		http.Error(response, "Invalid reminder ID", http.StatusBadRequest)
+		return
+	}
+
+	err = json.NewDecoder(request.Body).Decode(&reminder)
+	if err != nil {
+		http.Error(response, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	_, err = reminderRepo.Update(userID, reminderID, &reminder)
+	if err != nil {
+		http.Error(response, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	response.WriteHeader(http.StatusOK)
+	json.NewEncoder(response).Encode(reminder)
+}
