@@ -30,7 +30,6 @@ func (*reminderRepo) FindAllUserReminders(userID int64) ([]models.Reminder, erro
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return nil, err
 	}
 
@@ -45,12 +44,10 @@ func (*reminderRepo) FindAllUserReminders(userID int64) ([]models.Reminder, erro
 			break
 		}
 		if err != nil {
-			log.Fatalf("Failed to iterate the list of reminders: %v", err)
 			return nil, err
 		}
 
 		if err := doc.DataTo(&reminder); err != nil {
-			log.Fatalf("Failed to convert data to Reminder struct: %v", err)
 			return nil, err
 		}
 
@@ -65,7 +62,6 @@ func (*reminderRepo) Save(reminder *models.Reminder) (*models.Reminder, error) {
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return nil, err
 	}
 
@@ -80,7 +76,6 @@ func (*reminderRepo) Save(reminder *models.Reminder) (*models.Reminder, error) {
 	})
 
 	if err != nil {
-		log.Fatalf("Failed to add a new reminder: %v", err)
 		return nil, err
 	}
 
@@ -92,7 +87,6 @@ func (*reminderRepo) GetUserRemindersMaxCount(userID int64) (int64, error) {
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return 0, err
 	}
 
@@ -106,7 +100,6 @@ func (*reminderRepo) GetUserRemindersMaxCount(userID int64) (int64, error) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Failed to iterate the list of reminders: %v", err)
 			return 0, err
 		}
 		
@@ -123,7 +116,6 @@ func (*reminderRepo) Delete(userID int64, reminderID int64) error {
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return err
 	}
 
@@ -152,7 +144,6 @@ func (*reminderRepo) Update(userID int64, reminderID int64, newData *models.Remi
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return nil, err
 	}
 

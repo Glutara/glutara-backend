@@ -28,7 +28,6 @@ func (*userRepo) Save(user *models.User) (*models.User, error) {
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return nil, err
 	}
 
@@ -44,7 +43,6 @@ func (*userRepo) Save(user *models.User) (*models.User, error) {
 	})
 
 	if err != nil {
-		log.Fatalf("Failed to add a new user: %v", err)
 		return nil, err
 	}
 
@@ -56,7 +54,6 @@ func (*userRepo) GetUserByEmail(email string) (*models.User, error) {
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return nil, err
 	}
 
@@ -69,12 +66,10 @@ func (*userRepo) GetUserByEmail(email string) (*models.User, error) {
 		return nil, errors.New("User not found")
 	}
 	if err != nil {
-		log.Fatalf("Failed to iterate the list of users: %v", err)
 		return nil, err
 	}
 
 	if err := doc.DataTo(&user); err != nil {
-		log.Fatalf("Failed to convert data to User struct: %v", err)
 		return nil, err
 	}
 
@@ -86,7 +81,6 @@ func (*userRepo) GetUserCount() (int64, error) {
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return 0, err
 	}
 
@@ -100,7 +94,6 @@ func (*userRepo) GetUserCount() (int64, error) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Failed to iterate the list of users: %v", err)
 			return 0, err
 		}
 		count++
