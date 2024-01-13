@@ -49,6 +49,11 @@ func CreateReminder(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	if userID != reminder.UserID {
+		http.Error(response, "Request payload does not match", http.StatusBadRequest)
+		return
+	}
+
 	max, err := reminderRepo.GetUserRemindersMaxCount(userID)
 	if err != nil {
 		http.Error(response, "Failed to get max reminder count", http.StatusInternalServerError)
@@ -56,7 +61,11 @@ func CreateReminder(response http.ResponseWriter, request *http.Request) {
 	}
 	reminder.ReminderID = max + 1
 
-	reminderRepo.Save(&reminder)
+	_, err = reminderRepo.Save(&reminder)
+	if err != nil {
+		http.Error(response, "Failed to create new reminder", http.StatusInternalServerError)
+		return
+	}
 
 	response.WriteHeader(http.StatusOK)
 	json.NewEncoder(response).Encode(reminder)
@@ -77,7 +86,7 @@ func DeleteReminder(response http.ResponseWriter, request *http.Request) {
 
 	err = reminderRepo.Delete(userID, reminderID)
 	if err != nil {
-		http.Error(response, err.Error(), http.StatusInternalServerError)
+		http.Error(response, "Failed to delete reminder", http.StatusInternalServerError)
 		return
 	}
 	response.WriteHeader(http.StatusOK)
@@ -104,9 +113,14 @@ func UpdateReminder(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	if userID != reminder.UserID || reminderID != reminder.ReminderID {
+		http.Error(response, "Request payload does not match", http.StatusBadRequest)
+		return
+	}
+
 	_, err = reminderRepo.Update(userID, reminderID, &reminder)
 	if err != nil {
-		http.Error(response, err.Error(), http.StatusInternalServerError)
+		http.Error(response, "Failed to update reminder", http.StatusInternalServerError)
 		return
 	}
 	

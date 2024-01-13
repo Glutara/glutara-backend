@@ -29,7 +29,7 @@ func Register(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	if existingUser != nil {
-		http.Error(response, "User with this email already exists", http.StatusInternalServerError)
+		http.Error(response, "User with this email already exists", http.StatusBadRequest)
 		return
 	}
 
@@ -46,7 +46,11 @@ func Register(response http.ResponseWriter, request *http.Request) {
 	}
 	user.Password = string(hashedPassword)
 	
-	userRepo.Save(&user)
+	_, err = userRepo.Save(&user)
+	if err != nil {
+		http.Error(response, "Failed to create new user", http.StatusInternalServerError)
+		return
+	}
 
 	response.WriteHeader(http.StatusOK)
 	json.NewEncoder(response).Encode(user)
@@ -65,7 +69,7 @@ func Login(response http.ResponseWriter, request *http.Request) {
 	existingUser, err := userRepo.GetUserByEmail(token.Email)
 	if err != nil {
 		if err.Error() == "User not found" {
-			http.Error(response, err.Error(), http.StatusInternalServerError)
+			http.Error(response, err.Error(), http.StatusBadRequest)
 			return
 		} else {
 			http.Error(response, "Failed to retrieve user data", http.StatusInternalServerError)
