@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"log"
 	"errors"
 
 	"cloud.google.com/go/firestore"

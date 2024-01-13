@@ -1,15 +1,15 @@
 package models
 
 type User struct {
-	ID			int64	`json:"id"`
-	Email		string	`json:"email"`
-	Password	string	`json:"password"`
-	Name		string	`json:"name"`
-	Role		int64	`json:"role"`
-	Phone		string	`json:"phone"`
+	ID			int64	`json:"ID"`
+	Email		string	`json:"Email"`
+	Password	string	`json:"Password"`
+	Name		string	`json:"Name"`
+	Role		int64	`json:"Role"`
+	Phone		string	`json:"Phone"`
 }
 
 type LoginToken struct {
-	Email		string	`json:"email"`
-	Password	string	`json:"password"`
+	Email		string	`json:"Email"`
+	Password	string	`json:"Password"`
 }

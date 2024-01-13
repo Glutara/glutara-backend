@@ -7,7 +7,7 @@ import (
 type Reminder struct {
 	UserID			int64		`json:"UserID"`
 	ReminderID		int64		`json:"ReminderID"`
-	Name			string		`json:"name"`
-	Description		string		`json:"description"`
-	Time			time.Time	`json:"time"`
+	Name			string		`json:"Name"`
+	Description		string		`json:"Description"`
+	Time			time.Time	`json:"Time"`
 }
