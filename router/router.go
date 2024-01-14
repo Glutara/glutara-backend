@@ -25,6 +25,12 @@ func Router() *mux.Router {
 	router.HandleFunc("/api/{UserID}/sleeps", middleware.CreateSleep).Methods("POST")
 	router.HandleFunc("/api/{UserID}/sleeps/{SleepID}", middleware.DeleteSleep).Methods("DELETE")
 	router.HandleFunc("/api/{UserID}/sleeps/{SleepID}", middleware.UpdateSleep).Methods("PUT")
+
+	// Exercise Log Handler
+	router.HandleFunc("/api/{UserID}/exercises", middleware.GetExercises).Methods("GET")
+	router.HandleFunc("/api/{UserID}/exercises", middleware.CreateExercise).Methods("POST")
+	router.HandleFunc("/api/{UserID}/exercises/{ExerciseID}", middleware.DeleteExercise).Methods("DELETE")
+	router.HandleFunc("/api/{UserID}/exercises/{ExerciseID}", middleware.UpdateExercise).Methods("PUT")
 	
 	return router
 }
