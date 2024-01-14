@@ -54,6 +54,17 @@ func CreateReminder(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	_, err = userRepo.GetUserByID(userID)
+	if err != nil {
+		if err.Error() != "User not found" {
+			http.Error(response, "Failed to check user", http.StatusInternalServerError)
+			return
+		} else {
+			http.Error(response, "User does not exist", http.StatusBadRequest)
+			return
+		}
+	}
+
 	max, err := reminderRepo.GetUserRemindersMaxCount(userID)
 	if err != nil {
 		http.Error(response, "Failed to get max reminder count", http.StatusInternalServerError)
@@ -116,6 +127,17 @@ func UpdateReminder(response http.ResponseWriter, request *http.Request) {
 	if userID != reminder.UserID || reminderID != reminder.ReminderID {
 		http.Error(response, "Request payload does not match", http.StatusBadRequest)
 		return
+	}
+
+	_, err = userRepo.GetUserByID(userID)
+	if err != nil {
+		if err.Error() != "User not found" {
+			http.Error(response, "Failed to check user", http.StatusInternalServerError)
+			return
+		} else {
+			http.Error(response, "User does not exist", http.StatusBadRequest)
+			return
+		}
 	}
 
 	_, err = reminderRepo.Update(userID, reminderID, &reminder)

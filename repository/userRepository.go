@@ -13,6 +13,7 @@ import (
 type UserRepository interface {
 	Save(*models.User) (*models.User, error)
 	GetUserByEmail(string) (*models.User, error)
+	GetUserByID(int64) (*models.User, error)
 	GetUserCount() (int64, error)	
 }
 
@@ -60,6 +61,33 @@ func (*userRepo) GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 
 	itr := client.Collection(config.UserCollection).Where("Email", "==", email).Documents(ctx)
+	doc, err := itr.Next()
+	if err == iterator.Done {
+		return nil, errors.New("User not found")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if err := doc.DataTo(&user); err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (*userRepo) GetUserByID(userID int64) (*models.User, error) {
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, config.ProjectID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer client.Close()
+	var user models.User
+
+	itr := client.Collection(config.UserCollection).Where("UserID", "==", userID).Documents(ctx)
 	doc, err := itr.Next()
 	if err == iterator.Done {
 		return nil, errors.New("User not found")
