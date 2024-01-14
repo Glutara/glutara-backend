@@ -87,7 +87,7 @@ func (*userRepo) GetUserByID(userID int64) (*models.User, error) {
 	defer client.Close()
 	var user models.User
 
-	itr := client.Collection(config.UserCollection).Where("UserID", "==", userID).Documents(ctx)
+	itr := client.Collection(config.UserCollection).Where("ID", "==", userID).Documents(ctx)
 	doc, err := itr.Next()
 	if err == iterator.Done {
 		return nil, errors.New("User not found")
