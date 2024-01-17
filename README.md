@@ -7,6 +7,8 @@ An IOT-based system with non-invasive wearable Continuous Glucose Monitor (CGM) 
 ## Table of Contents
 
 - [App Overview](#app-overview)
+- [Prerequisite](#prerequisite)
+- [How to Run](#how-to-run)
 - [List of Endpoints](#list-of-endpoints)
 - [Team](#team)
 
@@ -16,6 +18,26 @@ compounds the need for a more accessible and painless solution. Glutara aims to 
 blood glucose monitoring by offering a seamless and affordable solution, addressing the
 fundamental challenges faced by those managing diabetes on a daily basis.
 
+## Prerequisite
+Make sure you already do these things before running the code
+1. Install Go languange on your computer
+2. Download the Firebase admin-sdk json file located [here](https://drive.google.com/file/d/18jmUb9Jbsv71MlGfDy0UBbCkTBL0Khf_/view?usp=sharing)
+
+## How to Run
+1. Clone this repository from terminal using this following command
+    ``` bash
+    $ git clone https://github.com/Glutara/glutara-machine-learning.git
+    ```
+2. Using Windows PowerShell, navigate to this repository directory
+3. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable using this following command
+    ``` bash
+    $ $env:GOOGLE_APPLICATION_CREDENTIALS="path/to/the/admin-sdk/json/file"
+    ```
+4. Run the server using this following command
+    ``` bash
+    $ go run main.go
+    ```
+    
 ## List of Endpoints
 
 | Endpoint                             |  Method  |   Usage  |
@@ -25,6 +47,23 @@ fundamental challenges faced by those managing diabetes on a daily basis.
 | /api/{UserID}/reminders              | GET      | Users can see their reminders
 | /api/{UserID}/reminders              | POST     | Users can add a new reminder
 | /api/{UserID}/reminders/{ReminderID} | DELETE   | Users can delete existing reminder
+| /api/{UserID}/reminders/{ReminderID} | PUT      | Users can update existing reminder
+| /api/{UserID}/sleeps                 | GET      | Users can see their sleep logs
+| /api/{UserID}/sleeps                 | POST     | Users can add a new sleep log
+| /api/{UserID}/sleeps/{SleepID}       | DELETE   | Users can delete existing sleep log
+| /api/{UserID}/sleeps/{SleepID}       | PUT      | Users can update existing sleep log
+| /api/{UserID}/exercises              | GET      | Users can see their exercise logs
+| /api/{UserID}/exercises              | POST     | Users can add a new exercise log
+| /api/{UserID}/exercises/{ExerciseID} | DELETE   | Users can delete existing exercise log
+| /api/{UserID}/exercises/{ExerciseID} | PUT      | Users can update existing exercise log
+| /api/{UserID}/meals                  | GET      | Users can see their meal logs
+| /api/{UserID}/meals                  | POST     | Users can add a new meal log
+| /api/{UserID}/meals/{MealID}         | DELETE   | Users can delete existing meal log
+| /api/{UserID}/meals/{MealID}         | PUT      | Users can update existing meal log
+| /api/{UserID}/medications                  | GET      | Users can see their medication logs
+| /api/{UserID}/medications                  | POST     | Users can add a new medication log
+| /api/{UserID}/medications/{MedicationID}   | DELETE   | Users can delete existing medication log
+| /api/{UserID}/medications/{MedicationID}   | PUT      | Users can update existing medication log
 
 ## Team
 
