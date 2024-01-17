@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"golang.org/x/crypto/bcrypt"
+	"fmt"
 
 	"glutara/repository"
 	"glutara/models"
@@ -12,6 +13,16 @@ import (
 var (
 	userRepo repository.UserRepository = repository.NewUserRepository()
 )
+
+func MainHandler(w http.ResponseWriter, r *http.Request) {
+	// Allow all origin to handle cors issue
+	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	fmt.Fprintf(w, "Hello, Welcome to Glutara Web Service!")
+}
 
 func Register(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
