@@ -18,6 +18,8 @@ compounds the need for a more accessible and painless solution. Glutara aims to 
 blood glucose monitoring by offering a seamless and affordable solution, addressing the
 fundamental challenges faced by those managing diabetes on a daily basis.
 
+This repository is dedicated to manage the code needed to run Glutara backend server.
+
 ## Prerequisite
 Make sure you already do these things before running the code
 1. Install Go languange on your computer
