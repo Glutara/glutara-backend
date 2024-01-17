@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"log"
 	"errors"
 
 	"cloud.google.com/go/firestore"
@@ -16,6 +15,7 @@ type ReminderRepository interface {
 	Save(*models.Reminder) (*models.Reminder, error)
 	GetUserRemindersMaxCount(int64) (int64, error)
 	Delete(int64, int64) error
+	Update(int64, int64, *models.Reminder) (*models.Reminder, error)
 }
 
 type reminderRepo struct{}
@@ -29,7 +29,6 @@ func (*reminderRepo) FindAllUserReminders(userID int64) ([]models.Reminder, erro
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return nil, err
 	}
 
@@ -44,12 +43,10 @@ func (*reminderRepo) FindAllUserReminders(userID int64) ([]models.Reminder, erro
 			break
 		}
 		if err != nil {
-			log.Fatalf("Failed to iterate the list of reminders: %v", err)
 			return nil, err
 		}
 
 		if err := doc.DataTo(&reminder); err != nil {
-			log.Fatalf("Failed to convert data to Reminder struct: %v", err)
 			return nil, err
 		}
 
@@ -64,7 +61,6 @@ func (*reminderRepo) Save(reminder *models.Reminder) (*models.Reminder, error) {
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return nil, err
 	}
 
@@ -79,7 +75,6 @@ func (*reminderRepo) Save(reminder *models.Reminder) (*models.Reminder, error) {
 	})
 
 	if err != nil {
-		log.Fatalf("Failed to add a new reminder: %v", err)
 		return nil, err
 	}
 
@@ -91,7 +86,6 @@ func (*reminderRepo) GetUserRemindersMaxCount(userID int64) (int64, error) {
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return 0, err
 	}
 
@@ -105,7 +99,6 @@ func (*reminderRepo) GetUserRemindersMaxCount(userID int64) (int64, error) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Failed to iterate the list of reminders: %v", err)
 			return 0, err
 		}
 		
@@ -122,7 +115,6 @@ func (*reminderRepo) Delete(userID int64, reminderID int64) error {
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return err
 	}
 
@@ -144,4 +136,31 @@ func (*reminderRepo) Delete(userID int64, reminderID int64) error {
 	}
 
 	return nil
+}
+
+func (*reminderRepo) Update(userID int64, reminderID int64, newData *models.Reminder) (*models.Reminder, error) {
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, config.ProjectID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer client.Close()
+	itr := client.Collection(config.ReminderCollection).Where("UserID", "==", userID).Where("ReminderID", "==", reminderID).Documents(ctx)
+	doc, err := itr.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(doc) != 1 {
+		return nil, errors.New("Reminder not found")
+	}
+
+	_, err = doc[0].Ref.Set(ctx, *newData)
+	if err != nil {
+		return nil, err
+	}
+
+	return newData, nil
 }

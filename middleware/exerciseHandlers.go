@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	reminderRepo repository.ReminderRepository = repository.NewReminderRepository()
+	exerciseRepo repository.ExerciseRepository = repository.NewExerciseRepository()
 )
 
-func GetReminders(response http.ResponseWriter, request *http.Request) {
+func GetExercises(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
@@ -23,19 +23,19 @@ func GetReminders(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	
-	reminders, err := reminderRepo.FindAllUserReminders(userID)
+	exercises, err := exerciseRepo.FindAllUserExercises(userID)
 	if err != nil {
-		http.Error(response, "Failed to retrieve reminders data", http.StatusInternalServerError)
+		http.Error(response, "Failed to retrieve exercise logs data", http.StatusInternalServerError)
 		return
 	}
 
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(reminders)
+	json.NewEncoder(response).Encode(exercises)
 }
 
-func CreateReminder(response http.ResponseWriter, request *http.Request) {
+func CreateExercise(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
-	var reminder models.Reminder
+	var exercise models.Exercise
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
 	if err != nil {
@@ -43,13 +43,13 @@ func CreateReminder(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err = json.NewDecoder(request.Body).Decode(&reminder)
+	err = json.NewDecoder(request.Body).Decode(&exercise)
 	if err != nil {
 		http.Error(response, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	if userID != reminder.UserID {
+	if userID != exercise.UserID {
 		http.Error(response, "Request payload does not match", http.StatusBadRequest)
 		return
 	}
@@ -65,66 +65,66 @@ func CreateReminder(response http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	max, err := reminderRepo.GetUserRemindersMaxCount(userID)
+	max, err := exerciseRepo.GetUserExercisesMaxCount(userID)
 	if err != nil {
-		http.Error(response, "Failed to get max reminder count", http.StatusInternalServerError)
+		http.Error(response, "Failed to get max exercise log count", http.StatusInternalServerError)
 		return
 	}
-	reminder.ReminderID = max + 1
+	exercise.ExerciseID = max + 1
 
-	_, err = reminderRepo.Save(&reminder)
+	_, err = exerciseRepo.Save(&exercise)
 	if err != nil {
-		http.Error(response, "Failed to create new reminder", http.StatusInternalServerError)
+		http.Error(response, "Failed to create new exercise log", http.StatusInternalServerError)
 		return
 	}
 
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(reminder)
+	json.NewEncoder(response).Encode(exercise)
 }
 
-func DeleteReminder(response http.ResponseWriter, request *http.Request) {
+func DeleteExercise(response http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
 	if err != nil {
 		http.Error(response, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	reminderID, err := strconv.ParseInt(vars["ReminderID"], 10, 64)
+	exerciseID, err := strconv.ParseInt(vars["ExerciseID"], 10, 64)
 	if err != nil {
-		http.Error(response, "Invalid reminder ID", http.StatusBadRequest)
+		http.Error(response, "Invalid exercise log ID", http.StatusBadRequest)
 		return
 	}
 
-	err = reminderRepo.Delete(userID, reminderID)
+	err = exerciseRepo.Delete(userID, exerciseID)
 	if err != nil {
-		http.Error(response, "Failed to delete reminder", http.StatusInternalServerError)
+		http.Error(response, "Failed to delete exercise log", http.StatusInternalServerError)
 		return
 	}
 	response.WriteHeader(http.StatusOK)
 }
 
-func UpdateReminder(response http.ResponseWriter, request *http.Request) {
+func UpdateExercise(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
-	var reminder models.Reminder
+	var exercise models.Exercise
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
 	if err != nil {
 		http.Error(response, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	reminderID, err := strconv.ParseInt(vars["ReminderID"], 10, 64)
+	exerciseID, err := strconv.ParseInt(vars["ExerciseID"], 10, 64)
 	if err != nil {
-		http.Error(response, "Invalid reminder ID", http.StatusBadRequest)
+		http.Error(response, "Invalid exercise  log ID", http.StatusBadRequest)
 		return
 	}
 
-	err = json.NewDecoder(request.Body).Decode(&reminder)
+	err = json.NewDecoder(request.Body).Decode(&exercise)
 	if err != nil {
 		http.Error(response, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	if userID != reminder.UserID || reminderID != reminder.ReminderID {
+	if userID != exercise.UserID || exerciseID != exercise.ExerciseID {
 		http.Error(response, "Request payload does not match", http.StatusBadRequest)
 		return
 	}
@@ -140,12 +140,12 @@ func UpdateReminder(response http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	_, err = reminderRepo.Update(userID, reminderID, &reminder)
+	_, err = exerciseRepo.Update(userID, exerciseID, &exercise)
 	if err != nil {
-		http.Error(response, "Failed to update reminder", http.StatusInternalServerError)
+		http.Error(response, "Failed to update exercise log", http.StatusInternalServerError)
 		return
 	}
 	
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(reminder)
+	json.NewEncoder(response).Encode(exercise)
 }

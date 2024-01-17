@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"log"
 	"errors"
 
 	"cloud.google.com/go/firestore"
@@ -14,6 +13,7 @@ import (
 type UserRepository interface {
 	Save(*models.User) (*models.User, error)
 	GetUserByEmail(string) (*models.User, error)
+	GetUserByID(int64) (*models.User, error)
 	GetUserCount() (int64, error)	
 }
 
@@ -28,7 +28,6 @@ func (*userRepo) Save(user *models.User) (*models.User, error) {
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return nil, err
 	}
 
@@ -44,7 +43,6 @@ func (*userRepo) Save(user *models.User) (*models.User, error) {
 	})
 
 	if err != nil {
-		log.Fatalf("Failed to add a new user: %v", err)
 		return nil, err
 	}
 
@@ -56,7 +54,6 @@ func (*userRepo) GetUserByEmail(email string) (*models.User, error) {
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return nil, err
 	}
 
@@ -69,12 +66,37 @@ func (*userRepo) GetUserByEmail(email string) (*models.User, error) {
 		return nil, errors.New("User not found")
 	}
 	if err != nil {
-		log.Fatalf("Failed to iterate the list of users: %v", err)
 		return nil, err
 	}
 
 	if err := doc.DataTo(&user); err != nil {
-		log.Fatalf("Failed to convert data to User struct: %v", err)
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (*userRepo) GetUserByID(userID int64) (*models.User, error) {
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, config.ProjectID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer client.Close()
+	var user models.User
+
+	itr := client.Collection(config.UserCollection).Where("ID", "==", userID).Documents(ctx)
+	doc, err := itr.Next()
+	if err == iterator.Done {
+		return nil, errors.New("User not found")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if err := doc.DataTo(&user); err != nil {
 		return nil, err
 	}
 
@@ -86,7 +108,6 @@ func (*userRepo) GetUserCount() (int64, error) {
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to Create a Firestore Client: %v", err)
 		return 0, err
 	}
 
@@ -100,7 +121,6 @@ func (*userRepo) GetUserCount() (int64, error) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Failed to iterate the list of users: %v", err)
 			return 0, err
 		}
 		count++

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"golang.org/x/crypto/bcrypt"
+	"fmt"
 
 	"glutara/repository"
 	"glutara/models"
@@ -12,6 +13,16 @@ import (
 var (
 	userRepo repository.UserRepository = repository.NewUserRepository()
 )
+
+func MainHandler(w http.ResponseWriter, r *http.Request) {
+	// Allow all origin to handle cors issue
+	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	fmt.Fprintf(w, "Hello, Welcome to Glutara Web Service!")
+}
 
 func Register(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
@@ -29,7 +40,7 @@ func Register(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	if existingUser != nil {
-		http.Error(response, "User with this email already exists", http.StatusInternalServerError)
+		http.Error(response, "User with this email already exists", http.StatusBadRequest)
 		return
 	}
 
@@ -46,7 +57,11 @@ func Register(response http.ResponseWriter, request *http.Request) {
 	}
 	user.Password = string(hashedPassword)
 	
-	userRepo.Save(&user)
+	_, err = userRepo.Save(&user)
+	if err != nil {
+		http.Error(response, "Failed to create new user", http.StatusInternalServerError)
+		return
+	}
 
 	response.WriteHeader(http.StatusOK)
 	json.NewEncoder(response).Encode(user)
@@ -65,7 +80,7 @@ func Login(response http.ResponseWriter, request *http.Request) {
 	existingUser, err := userRepo.GetUserByEmail(token.Email)
 	if err != nil {
 		if err.Error() == "User not found" {
-			http.Error(response, err.Error(), http.StatusInternalServerError)
+			http.Error(response, err.Error(), http.StatusBadRequest)
 			return
 		} else {
 			http.Error(response, "Failed to retrieve user data", http.StatusInternalServerError)

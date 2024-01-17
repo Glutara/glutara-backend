@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	reminderRepo repository.ReminderRepository = repository.NewReminderRepository()
+	mealRepo repository.MealRepository = repository.NewMealRepository()
 )
 
-func GetReminders(response http.ResponseWriter, request *http.Request) {
+func GetMeals(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
@@ -23,19 +23,19 @@ func GetReminders(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	
-	reminders, err := reminderRepo.FindAllUserReminders(userID)
+	meals, err := mealRepo.FindAllUserMeals(userID)
 	if err != nil {
-		http.Error(response, "Failed to retrieve reminders data", http.StatusInternalServerError)
+		http.Error(response, "Failed to retrieve meal logs data", http.StatusInternalServerError)
 		return
 	}
 
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(reminders)
+	json.NewEncoder(response).Encode(meals)
 }
 
-func CreateReminder(response http.ResponseWriter, request *http.Request) {
+func CreateMeal(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
-	var reminder models.Reminder
+	var meal models.Meal
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
 	if err != nil {
@@ -43,13 +43,13 @@ func CreateReminder(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err = json.NewDecoder(request.Body).Decode(&reminder)
+	err = json.NewDecoder(request.Body).Decode(&meal)
 	if err != nil {
 		http.Error(response, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	if userID != reminder.UserID {
+	if userID != meal.UserID {
 		http.Error(response, "Request payload does not match", http.StatusBadRequest)
 		return
 	}
@@ -65,66 +65,66 @@ func CreateReminder(response http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	max, err := reminderRepo.GetUserRemindersMaxCount(userID)
+	max, err := mealRepo.GetUserMealsMaxCount(userID)
 	if err != nil {
-		http.Error(response, "Failed to get max reminder count", http.StatusInternalServerError)
+		http.Error(response, "Failed to get max meal log count", http.StatusInternalServerError)
 		return
 	}
-	reminder.ReminderID = max + 1
+	meal.MealID = max + 1
 
-	_, err = reminderRepo.Save(&reminder)
+	_, err = mealRepo.Save(&meal)
 	if err != nil {
-		http.Error(response, "Failed to create new reminder", http.StatusInternalServerError)
+		http.Error(response, "Failed to create new meal log", http.StatusInternalServerError)
 		return
 	}
 
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(reminder)
+	json.NewEncoder(response).Encode(meal)
 }
 
-func DeleteReminder(response http.ResponseWriter, request *http.Request) {
+func DeleteMeal(response http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
 	if err != nil {
 		http.Error(response, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	reminderID, err := strconv.ParseInt(vars["ReminderID"], 10, 64)
+	mealID, err := strconv.ParseInt(vars["MealID"], 10, 64)
 	if err != nil {
-		http.Error(response, "Invalid reminder ID", http.StatusBadRequest)
+		http.Error(response, "Invalid meal log ID", http.StatusBadRequest)
 		return
 	}
 
-	err = reminderRepo.Delete(userID, reminderID)
+	err = mealRepo.Delete(userID, mealID)
 	if err != nil {
-		http.Error(response, "Failed to delete reminder", http.StatusInternalServerError)
+		http.Error(response, "Failed to delete meal log", http.StatusInternalServerError)
 		return
 	}
 	response.WriteHeader(http.StatusOK)
 }
 
-func UpdateReminder(response http.ResponseWriter, request *http.Request) {
+func UpdateMeal(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
-	var reminder models.Reminder
+	var meal models.Meal
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
 	if err != nil {
 		http.Error(response, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	reminderID, err := strconv.ParseInt(vars["ReminderID"], 10, 64)
+	mealID, err := strconv.ParseInt(vars["MealID"], 10, 64)
 	if err != nil {
-		http.Error(response, "Invalid reminder ID", http.StatusBadRequest)
+		http.Error(response, "Invalid meal  log ID", http.StatusBadRequest)
 		return
 	}
 
-	err = json.NewDecoder(request.Body).Decode(&reminder)
+	err = json.NewDecoder(request.Body).Decode(&meal)
 	if err != nil {
 		http.Error(response, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	if userID != reminder.UserID || reminderID != reminder.ReminderID {
+	if userID != meal.UserID || mealID != meal.MealID {
 		http.Error(response, "Request payload does not match", http.StatusBadRequest)
 		return
 	}
@@ -140,12 +140,12 @@ func UpdateReminder(response http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	_, err = reminderRepo.Update(userID, reminderID, &reminder)
+	_, err = mealRepo.Update(userID, mealID, &meal)
 	if err != nil {
-		http.Error(response, "Failed to update reminder", http.StatusInternalServerError)
+		http.Error(response, "Failed to update meal log", http.StatusInternalServerError)
 		return
 	}
 	
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(reminder)
+	json.NewEncoder(response).Encode(meal)
 }

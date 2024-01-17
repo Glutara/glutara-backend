@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	reminderRepo repository.ReminderRepository = repository.NewReminderRepository()
+	sleepRepo repository.SleepRepository = repository.NewSleepRepository()
 )
 
-func GetReminders(response http.ResponseWriter, request *http.Request) {
+func GetSleeps(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
@@ -23,19 +23,19 @@ func GetReminders(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	
-	reminders, err := reminderRepo.FindAllUserReminders(userID)
+	sleeps, err := sleepRepo.FindAllUserSleeps(userID)
 	if err != nil {
-		http.Error(response, "Failed to retrieve reminders data", http.StatusInternalServerError)
+		http.Error(response, "Failed to retrieve sleep logs data", http.StatusInternalServerError)
 		return
 	}
 
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(reminders)
+	json.NewEncoder(response).Encode(sleeps)
 }
 
-func CreateReminder(response http.ResponseWriter, request *http.Request) {
+func CreateSleep(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
-	var reminder models.Reminder
+	var sleep models.Sleep
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
 	if err != nil {
@@ -43,13 +43,13 @@ func CreateReminder(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err = json.NewDecoder(request.Body).Decode(&reminder)
+	err = json.NewDecoder(request.Body).Decode(&sleep)
 	if err != nil {
 		http.Error(response, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	if userID != reminder.UserID {
+	if userID != sleep.UserID {
 		http.Error(response, "Request payload does not match", http.StatusBadRequest)
 		return
 	}
@@ -65,66 +65,66 @@ func CreateReminder(response http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	max, err := reminderRepo.GetUserRemindersMaxCount(userID)
+	max, err := sleepRepo.GetUserSleepsMaxCount(userID)
 	if err != nil {
-		http.Error(response, "Failed to get max reminder count", http.StatusInternalServerError)
+		http.Error(response, "Failed to get max sleep log count", http.StatusInternalServerError)
 		return
 	}
-	reminder.ReminderID = max + 1
+	sleep.SleepID = max + 1
 
-	_, err = reminderRepo.Save(&reminder)
+	_, err = sleepRepo.Save(&sleep)
 	if err != nil {
-		http.Error(response, "Failed to create new reminder", http.StatusInternalServerError)
+		http.Error(response, "Failed to create new sleep log", http.StatusInternalServerError)
 		return
 	}
 
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(reminder)
+	json.NewEncoder(response).Encode(sleep)
 }
 
-func DeleteReminder(response http.ResponseWriter, request *http.Request) {
+func DeleteSleep(response http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
 	if err != nil {
 		http.Error(response, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	reminderID, err := strconv.ParseInt(vars["ReminderID"], 10, 64)
+	sleepID, err := strconv.ParseInt(vars["SleepID"], 10, 64)
 	if err != nil {
-		http.Error(response, "Invalid reminder ID", http.StatusBadRequest)
+		http.Error(response, "Invalid sleep log ID", http.StatusBadRequest)
 		return
 	}
 
-	err = reminderRepo.Delete(userID, reminderID)
+	err = sleepRepo.Delete(userID, sleepID)
 	if err != nil {
-		http.Error(response, "Failed to delete reminder", http.StatusInternalServerError)
+		http.Error(response, "Failed to delete sleep log", http.StatusInternalServerError)
 		return
 	}
 	response.WriteHeader(http.StatusOK)
 }
 
-func UpdateReminder(response http.ResponseWriter, request *http.Request) {
+func UpdateSleep(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
-	var reminder models.Reminder
+	var sleep models.Sleep
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
 	if err != nil {
 		http.Error(response, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	reminderID, err := strconv.ParseInt(vars["ReminderID"], 10, 64)
+	sleepID, err := strconv.ParseInt(vars["SleepID"], 10, 64)
 	if err != nil {
-		http.Error(response, "Invalid reminder ID", http.StatusBadRequest)
+		http.Error(response, "Invalid sleep  log ID", http.StatusBadRequest)
 		return
 	}
 
-	err = json.NewDecoder(request.Body).Decode(&reminder)
+	err = json.NewDecoder(request.Body).Decode(&sleep)
 	if err != nil {
 		http.Error(response, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	if userID != reminder.UserID || reminderID != reminder.ReminderID {
+	if userID != sleep.UserID || sleepID != sleep.SleepID {
 		http.Error(response, "Request payload does not match", http.StatusBadRequest)
 		return
 	}
@@ -140,12 +140,12 @@ func UpdateReminder(response http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	_, err = reminderRepo.Update(userID, reminderID, &reminder)
+	_, err = sleepRepo.Update(userID, sleepID, &sleep)
 	if err != nil {
-		http.Error(response, "Failed to update reminder", http.StatusInternalServerError)
+		http.Error(response, "Failed to update sleep log", http.StatusInternalServerError)
 		return
 	}
 	
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(reminder)
+	json.NewEncoder(response).Encode(sleep)
 }

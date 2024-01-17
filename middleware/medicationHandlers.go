@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	reminderRepo repository.ReminderRepository = repository.NewReminderRepository()
+	medicationRepo repository.MedicationRepository = repository.NewMedicationRepository()
 )
 
-func GetReminders(response http.ResponseWriter, request *http.Request) {
+func GetMedications(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
@@ -23,19 +23,19 @@ func GetReminders(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	
-	reminders, err := reminderRepo.FindAllUserReminders(userID)
+	medications, err := medicationRepo.FindAllUserMedications(userID)
 	if err != nil {
-		http.Error(response, "Failed to retrieve reminders data", http.StatusInternalServerError)
+		http.Error(response, "Failed to retrieve medication logs data", http.StatusInternalServerError)
 		return
 	}
 
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(reminders)
+	json.NewEncoder(response).Encode(medications)
 }
 
-func CreateReminder(response http.ResponseWriter, request *http.Request) {
+func CreateMedication(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
-	var reminder models.Reminder
+	var medication models.Medication
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
 	if err != nil {
@@ -43,13 +43,13 @@ func CreateReminder(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err = json.NewDecoder(request.Body).Decode(&reminder)
+	err = json.NewDecoder(request.Body).Decode(&medication)
 	if err != nil {
 		http.Error(response, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	if userID != reminder.UserID {
+	if userID != medication.UserID {
 		http.Error(response, "Request payload does not match", http.StatusBadRequest)
 		return
 	}
@@ -65,66 +65,66 @@ func CreateReminder(response http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	max, err := reminderRepo.GetUserRemindersMaxCount(userID)
+	max, err := medicationRepo.GetUserMedicationsMaxCount(userID)
 	if err != nil {
-		http.Error(response, "Failed to get max reminder count", http.StatusInternalServerError)
+		http.Error(response, "Failed to get max medication log count", http.StatusInternalServerError)
 		return
 	}
-	reminder.ReminderID = max + 1
+	medication.MedicationID = max + 1
 
-	_, err = reminderRepo.Save(&reminder)
+	_, err = medicationRepo.Save(&medication)
 	if err != nil {
-		http.Error(response, "Failed to create new reminder", http.StatusInternalServerError)
+		http.Error(response, "Failed to create new medication log", http.StatusInternalServerError)
 		return
 	}
 
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(reminder)
+	json.NewEncoder(response).Encode(medication)
 }
 
-func DeleteReminder(response http.ResponseWriter, request *http.Request) {
+func DeleteMedication(response http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
 	if err != nil {
 		http.Error(response, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	reminderID, err := strconv.ParseInt(vars["ReminderID"], 10, 64)
+	medicationID, err := strconv.ParseInt(vars["MedicationID"], 10, 64)
 	if err != nil {
-		http.Error(response, "Invalid reminder ID", http.StatusBadRequest)
+		http.Error(response, "Invalid medication log ID", http.StatusBadRequest)
 		return
 	}
 
-	err = reminderRepo.Delete(userID, reminderID)
+	err = medicationRepo.Delete(userID, medicationID)
 	if err != nil {
-		http.Error(response, "Failed to delete reminder", http.StatusInternalServerError)
+		http.Error(response, "Failed to delete medication log", http.StatusInternalServerError)
 		return
 	}
 	response.WriteHeader(http.StatusOK)
 }
 
-func UpdateReminder(response http.ResponseWriter, request *http.Request) {
+func UpdateMedication(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
-	var reminder models.Reminder
+	var medication models.Medication
 	vars := mux.Vars(request)
 	userID, err := strconv.ParseInt(vars["UserID"], 10, 64)
 	if err != nil {
 		http.Error(response, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	reminderID, err := strconv.ParseInt(vars["ReminderID"], 10, 64)
+	medicationID, err := strconv.ParseInt(vars["MedicationID"], 10, 64)
 	if err != nil {
-		http.Error(response, "Invalid reminder ID", http.StatusBadRequest)
+		http.Error(response, "Invalid medication  log ID", http.StatusBadRequest)
 		return
 	}
 
-	err = json.NewDecoder(request.Body).Decode(&reminder)
+	err = json.NewDecoder(request.Body).Decode(&medication)
 	if err != nil {
 		http.Error(response, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	if userID != reminder.UserID || reminderID != reminder.ReminderID {
+	if userID != medication.UserID || medicationID != medication.MedicationID {
 		http.Error(response, "Request payload does not match", http.StatusBadRequest)
 		return
 	}
@@ -140,12 +140,12 @@ func UpdateReminder(response http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	_, err = reminderRepo.Update(userID, reminderID, &reminder)
+	_, err = medicationRepo.Update(userID, medicationID, &medication)
 	if err != nil {
-		http.Error(response, "Failed to update reminder", http.StatusInternalServerError)
+		http.Error(response, "Failed to update medication log", http.StatusInternalServerError)
 		return
 	}
 	
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(reminder)
+	json.NewEncoder(response).Encode(medication)
 }
