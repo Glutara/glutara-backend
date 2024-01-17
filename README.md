@@ -30,15 +30,17 @@ Make sure you already do these things before running the code
     ``` bash
     $ git clone https://github.com/Glutara/glutara-backend.git
     ```
-2. Using Windows PowerShell, navigate to this repository directory
-3. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable using this following command
+2. Create a .env file inside the repository directory using .env.example file as the template. You can keep the PORT variable blank. The server should automatically use port 8080 as the default port
+3. Using Windows PowerShell, navigate to this repository directory
+4. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable using this following command
     ``` bash
     $ $env:GOOGLE_APPLICATION_CREDENTIALS="path/to/the/admin-sdk/json/file"
     ```
-4. Run the server using this following command
+5. Run the server using this following command
     ``` bash
     $ go run main.go
     ```
+6. Glutara backend server should be running. You can also check the server by opening http://localhost:8080/api
     
 ## List of Endpoints
 
