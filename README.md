@@ -26,7 +26,7 @@ Make sure you already do these things before running the code
 ## How to Run
 1. Clone this repository from terminal using this following command
     ``` bash
-    $ git clone https://github.com/Glutara/glutara-machine-learning.git
+    $ git clone https://github.com/Glutara/glutara-backend.git
     ```
 2. Using Windows PowerShell, navigate to this repository directory
 3. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable using this following command
