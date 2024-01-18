@@ -19,16 +19,11 @@ func main() {
 	// Activate router
 	r := router.Router()
 
-	// TODO :
-	// Create DB connection
-	// Set the instance of Repo in middleware package
-	// Defer close DB
-
     // Start server
 	// Use `PORT` provided in environment or default to 8080
   	var port = envPortOr("8080")
 	fmt.Println("Starting server...")
-	fmt.Println("Listening from http://localhost" + port + "/api/")
+	fmt.Println("Listening from http://localhost" + port + "/api")
 	log.Fatal(http.ListenAndServe(port, r))
 }
 
