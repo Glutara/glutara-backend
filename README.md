@@ -1,31 +1,43 @@
-<div align="center"><img src = "assets/glutara.png" width = 20% height= 20%></div>
+<br>
+<div align="center">
+    <div >
+        <img height="200px" src="./assets/Glutara.png" alt=""/>
+    </div>
+    <div>
+            <h3><b>Glutara</b></h3>
+            <p><i>A Key to Your Diabetes Journey</i></p>
+    </div>      
+</div>
+<br>
+<h1 align="center">Glutara Backend</h1>
+The silent maestro: Glutara's robust backend hums quietly behind the scenes, orchestrating the flow of data, ensuring seamless performance and secure storage. It's the invisible force making everything tick, keeping your health journey smooth and reliable.
+
+## 👨🏻‍💻 &nbsp;Technology Stack
 
 <div align="center">
-An IOT-based system with non-invasive wearable Continuous Glucose Monitor (CGM) for diabetic people
+<kbd>
+<img src="./assets/icons/Firebase.png" height="60" />
+</kbd>
+<kbd>
+<img src="./assets/icons/Go.png" height="60" />
+</kbd>
+<kbd>
+<img src="./assets/icons/Gin.png" height="60" />
+</kbd>
+<kbd>
+<img src="./assets/icons/Maps.png" height="60" />
+</kbd>
+</div>
+<div align="center">
+<h4>Firebase | Go | Gin | Google Maps Platform</h4>
 </div>
 
-## Table of Contents
-
-- [App Overview](#app-overview)
-- [Prerequisite](#prerequisite)
-- [How to Run](#how-to-run)
-- [List of Endpoints](#list-of-endpoints)
-- [Team](#team)
-
-## App Overview
-Millions of individuals worldwide grapple with the relentless challenges of managing diabetes, a chronic condition that demands consistent monitoring and care. Despite the advancements in technology, the process remains burdensome, with traditional finger-pricking glucose monitoring causing discomfort and hindering regular monitoring. This issue is exacerbated for those leading busy lives, leaving little time for necessary health measures. The fear of potential health emergencies, particularly for individuals living alone, further
-compounds the need for a more accessible and painless solution. Glutara aims to revolutionize
-blood glucose monitoring by offering a seamless and affordable solution, addressing the
-fundamental challenges faced by those managing diabetes on a daily basis.
-
-This repository is dedicated to manage the code needed to run Glutara backend server.
-
-## Prerequisite
+## Getting Started
 Make sure you already do these things before running the code
 1. Install Go language on your computer
 2. Download the Firebase admin-sdk json file located [here](https://drive.google.com/file/d/18jmUb9Jbsv71MlGfDy0UBbCkTBL0Khf_/view?usp=sharing) to be able to connect to Firestore
 
-## How to Run
+## ⚙️ &nbsp;How to Run
 1. Clone this repository from terminal using this following command
     ``` bash
     git clone https://github.com/Glutara/glutara-backend.git
@@ -42,7 +54,7 @@ Make sure you already do these things before running the code
     ```
 6. Glutara backend server should be running. You can also check the server by opening http://localhost:8080/api
     
-## List of Endpoints
+## 🔑 &nbsp;List of Endpoints
 
 | Endpoint                             |  Method  |   Usage  |
 | ------------------------------------ | :------: | -------- |
@@ -71,12 +83,8 @@ Make sure you already do these things before running the code
 | /api/{UserID}/glucoses               | GET      | Users can see their blood glucose levels
 | /api/{UserID}/glucoses               | POST     | System can automatically predict and save user's blood glucose level
 
-## Team
+## 👥 &nbsp;Contributors
 
-Created and developed by AMN:
-| Name                           |   Role   |
-| ------------------------------ | :------: |
-| Michael Leon Putra Widhi       | Hustler  |
-| Margaretha Olivia Haryono      | Hipster  |
-| Go Dillon Audris               | Hacker   |
-| Austin Gabriel Pardosi         | Hacker   |
+| <a href="https://github.com/mikeleo03"><img width="100px" height="100px" src="./assets/picprof/Leon.png" alt=""/></a> | <a href="https://github.com/GoDillonAudris512"><img width="100px" height="100px" src="./assets/picprof/Dillon.png" alt=""/></a> | <a href="https://github.com/margarethaolivia"><img width="100px" height="100px" src="./assets/picprof/Olivia.png" alt=""/></a> | <a href="https://github.com/AustinPardosi"><img width="100px" height="100px" src="./assets/picprof/Austin.png" alt=""/></a> |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <div align="center"><h3><b><a href="https://github.com/mikeleo03">Michael Leon Putra Widhi</a></b></h3><p>Hustler</p><p><i>Bandung Institute of Technology</i></p></div>                                                                               | <div align="center"><h3><b><a href="https://github.com/GoDillonAudris512">Go Dillon Audris</a></b></h3></a><p>Hacker</p><p><i>Bandung Institute of Technology</i></p></div>                                                                          | <div align="center"><h3><b><a href="https://github.com/margarethaolivia">Margaretha Olivia Haryono</a></b></h3></a><p>Hipster</p><p><i>Bandung Institute of Technology</i></p></div></a>                                                               | <div align="center"><h3><b><a href="https://github.com/AustinPardosi">Austin Gabriel Pardosi</a></b></h3></a><p>Hacker</p><p><i>Bandung Institute of Technology</i></p></div>                                                                            |
