@@ -45,6 +45,10 @@ func Router() *mux.Router {
 	router.HandleFunc("/api/{UserID}/medications", middleware.CreateMedication).Methods("POST")
 	router.HandleFunc("/api/{UserID}/medications/{MedicationID}", middleware.DeleteMedication).Methods("DELETE")
 	router.HandleFunc("/api/{UserID}/medications/{MedicationID}", middleware.UpdateMedication).Methods("PUT")
-	
+
+	// Blood Glucose Level Handler
+	router.HandleFunc("/api/{UserID}/glucoses", middleware.GetBloodGlucoseLevels).Methods("GET")
+	router.HandleFunc("/api/{UserID}/glucoses", middleware.CreateBloodGlucoseLevel).Methods("POST")
+
 	return router
 }

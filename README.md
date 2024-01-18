@@ -22,23 +22,23 @@ This repository is dedicated to manage the code needed to run Glutara backend se
 
 ## Prerequisite
 Make sure you already do these things before running the code
-1. Install Go languange on your computer
-2. Download the Firebase admin-sdk json file located [here](https://drive.google.com/file/d/18jmUb9Jbsv71MlGfDy0UBbCkTBL0Khf_/view?usp=sharing)
+1. Install Go language on your computer
+2. Download the Firebase admin-sdk json file located [here](https://drive.google.com/file/d/18jmUb9Jbsv71MlGfDy0UBbCkTBL0Khf_/view?usp=sharing) to be able to connect to Firestore
 
 ## How to Run
 1. Clone this repository from terminal using this following command
     ``` bash
-    $ git clone https://github.com/Glutara/glutara-backend.git
+    git clone https://github.com/Glutara/glutara-backend.git
     ```
-2. Create a .env file inside the repository directory using .env.example file as the template. You can keep the PORT variable blank. The server should automatically use port 8080 as the default port
+2. Create a .env file inside the repository directory using .env.example file as the template. You can keep the variables blank. The server should automatically use port 8080 as the default port and port 8605 as the model serving port
 3. Using Windows PowerShell, navigate to this repository directory
 4. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable using this following command
     ``` bash
-    $ $env:GOOGLE_APPLICATION_CREDENTIALS="path/to/the/admin-sdk/json/file"
+    $env:GOOGLE_APPLICATION_CREDENTIALS="path/to/the/admin-sdk/json/file"
     ```
 5. Run the server using this following command
     ``` bash
-    $ go run main.go
+    go run main.go
     ```
 6. Glutara backend server should be running. You can also check the server by opening http://localhost:8080/api
     
@@ -68,6 +68,8 @@ Make sure you already do these things before running the code
 | /api/{UserID}/medications                  | POST     | Users can add a new medication log
 | /api/{UserID}/medications/{MedicationID}   | DELETE   | Users can delete existing medication log
 | /api/{UserID}/medications/{MedicationID}   | PUT      | Users can update existing medication log
+| /api/{UserID}/glucoses               | GET      | Users can see their blood glucose levels
+| /api/{UserID}/glucoses               | POST     | System can automatically predict and save user's blood glucose level
 
 ## Team
 
