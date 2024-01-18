@@ -1,7 +1,7 @@
 <br>
 <div align="center">
     <div >
-        <img height="200px" src="./assets/glutara.png" alt=""/>
+        <img height="150px" src="./assets/glutara.png" alt=""/>
     </div>
     <div>
             <h3><b>Glutara</b></h3>
