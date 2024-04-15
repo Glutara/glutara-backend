@@ -1,6 +1,6 @@
 package config
 
-const ProjectID string = "glutara"
+const ProjectID string = "upheld-acumen-420202"
 const UserCollection string = "users"
 const ReminderCollection string = "reminders"
 const SleepCollection string = "sleeps"
