@@ -1,30 +1,31 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"github.com/joho/godotenv"
+	"github.com/gin-gonic/gin"
 
 	"glutara/router"
 )
 
-func main() {
-	// Load environment variables from .env file
+func init() {
+	// Load environment variables from
     if err := godotenv.Load(); err != nil {
         log.Fatal("Error loading .env file")
     }
-	
-	// Activate router
-	r := router.Router()
+}
+
+func main() {
+	// Initialize Gin router
+	r := gin.Default()
+
+	// Configure router to include routes and middlewares
+	router.ConfigureRouter(r)
 
     // Start server
 	// Use `PORT` provided in environment or default to 8080
-  	var port = envPortOr("8080")
-	fmt.Println("Starting server...")
-	fmt.Println("Listening from http://localhost" + port + "/api")
-	log.Fatal(http.ListenAndServe(port, r))
+  	r.Run(envPortOr("8080"))
 }
 
 // PORT handling

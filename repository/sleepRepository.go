@@ -126,7 +126,7 @@ func (*sleepRepo) Delete(userID int64, sleepID int64) error {
 	}
 
 	if len(doc) != 1 {
-		return errors.New("Sleep log not found")
+		return errors.New("sleep log not found")
 	}
 
 	_, err = client.Collection(config.SleepCollection).Doc(doc[0].Ref.ID).Delete(ctx)
@@ -153,7 +153,7 @@ func (*sleepRepo) Update(userID int64, sleepID int64, newData *models.Sleep) (*m
 	}
 
 	if len(doc) != 1 {
-		return nil, errors.New("Sleep log not found")
+		return nil, errors.New("sleep log not found")
 	}
 
 	_, err = doc[0].Ref.Set(ctx, *newData)

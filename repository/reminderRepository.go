@@ -127,7 +127,7 @@ func (*reminderRepo) Delete(userID int64, reminderID int64) error {
 	}
 
 	if len(doc) != 1 {
-		return errors.New("Reminder not found")
+		return errors.New("reminder not found")
 	}
 
 	_, err = client.Collection(config.ReminderCollection).Doc(doc[0].Ref.ID).Delete(ctx)
@@ -154,7 +154,7 @@ func (*reminderRepo) Update(userID int64, reminderID int64, newData *models.Remi
 	}
 
 	if len(doc) != 1 {
-		return nil, errors.New("Reminder not found")
+		return nil, errors.New("reminder not found")
 	}
 
 	_, err = doc[0].Ref.Set(ctx, *newData)

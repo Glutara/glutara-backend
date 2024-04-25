@@ -130,7 +130,7 @@ func (*mealRepo) Delete(userID int64, mealID int64) error {
 	}
 
 	if len(doc) != 1 {
-		return errors.New("Meal log not found")
+		return errors.New("meal log not found")
 	}
 
 	_, err = client.Collection(config.MealCollection).Doc(doc[0].Ref.ID).Delete(ctx)
@@ -157,7 +157,7 @@ func (*mealRepo) Update(userID int64, mealID int64, newData *models.Meal) (*mode
 	}
 
 	if len(doc) != 1 {
-		return nil, errors.New("Meal log not found")
+		return nil, errors.New("meal log not found")
 	}
 
 	_, err = doc[0].Ref.Set(ctx, *newData)
