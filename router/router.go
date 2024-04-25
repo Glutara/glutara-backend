@@ -1,57 +1,59 @@
 package router
 
 import (
-	"glutara/middleware"
+	"github.com/gin-gonic/gin"
 
-	"github.com/gorilla/mux"
+	"glutara/handlers"
+	"glutara/middlewares"
 )
 
 // Router is exported and used in main.go
-func Router() *mux.Router {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/api", middleware.MainHandler).Methods("GET", "OPTIONS")
+func ConfigureRouter(router *gin.Engine) {
+	applyCorsMiddleware(router)
+	router.GET("/api", handlers.MainHandler)
 
 	// Auth Handler
-	router.HandleFunc("/api/auth/register", middleware.Register).Methods("POST")
-	router.HandleFunc("/api/auth/login", middleware.Login).Methods("POST")
-	
+	router.POST("/api/auth/register", handlers.Register)
+	router.POST("/api/auth/login", handlers.Login)
+
 	// Reminder Handler
-	router.HandleFunc("/api/{UserID}/reminders", middleware.GetReminders).Methods("GET")
-	router.HandleFunc("/api/{UserID}/reminders", middleware.CreateReminder).Methods("POST")
-	router.HandleFunc("/api/{UserID}/reminders/{ReminderID}", middleware.DeleteReminder).Methods("DELETE")
-	router.HandleFunc("/api/{UserID}/reminders/{ReminderID}", middleware.UpdateReminder).Methods("PUT")
+	router.GET("/api/:UserID/reminders", handlers.GetReminders)
+	router.POST("/api/:UserID/reminders", handlers.CreateReminder)
+	router.DELETE("/api/:UserID/reminders/:ReminderID", handlers.DeleteReminder)
+	router.PUT("/api/:UserID/reminders/:ReminderID", handlers.UpdateReminder)
 
 	// Sleep Log Handler
-	router.HandleFunc("/api/{UserID}/sleeps", middleware.GetSleeps).Methods("GET")
-	router.HandleFunc("/api/{UserID}/sleeps", middleware.CreateSleep).Methods("POST")
-	router.HandleFunc("/api/{UserID}/sleeps/{SleepID}", middleware.DeleteSleep).Methods("DELETE")
-	router.HandleFunc("/api/{UserID}/sleeps/{SleepID}", middleware.UpdateSleep).Methods("PUT")
+	router.GET("/api/:UserID/sleeps", handlers.GetSleeps)
+	router.POST("/api/:UserID/sleeps", handlers.CreateSleep)
+	router.DELETE("/api/:UserID/sleeps/:SleepID", handlers.DeleteSleep)
+	router.PUT("/api/:UserID/sleeps/:SleepID", handlers.UpdateSleep)
 
 	// Exercise Log Handler
-	router.HandleFunc("/api/{UserID}/exercises", middleware.GetExercises).Methods("GET")
-	router.HandleFunc("/api/{UserID}/exercises", middleware.CreateExercise).Methods("POST")
-	router.HandleFunc("/api/{UserID}/exercises/{ExerciseID}", middleware.DeleteExercise).Methods("DELETE")
-	router.HandleFunc("/api/{UserID}/exercises/{ExerciseID}", middleware.UpdateExercise).Methods("PUT")
+	router.GET("/api/:UserID/exercises", handlers.GetExercises)
+	router.POST("/api/:UserID/exercises", handlers.CreateExercise)
+	router.DELETE("/api/:UserID/exercises/:ExerciseID", handlers.DeleteExercise)
+	router.PUT("/api/:UserID/exercises/:ExerciseID", handlers.UpdateExercise)
 
 	// Meal Log Handler
-	router.HandleFunc("/api/{UserID}/meals", middleware.GetMeals).Methods("GET")
-	router.HandleFunc("/api/{UserID}/meals", middleware.CreateMeal).Methods("POST")
-	router.HandleFunc("/api/{UserID}/meals/{MealID}", middleware.DeleteMeal).Methods("DELETE")
-	router.HandleFunc("/api/{UserID}/meals/{MealID}", middleware.UpdateMeal).Methods("PUT")
+	router.GET("/api/:UserID/meals", handlers.GetMeals)
+	router.POST("/api/:UserID/meals", handlers.CreateMeal)
+	router.DELETE("/api/:UserID/meals/:MealID", handlers.DeleteMeal)
+	router.PUT("/api/:UserID/meals/:MealID", handlers.UpdateMeal)
 
 	// Medication Log Handler
-	router.HandleFunc("/api/{UserID}/medications", middleware.GetMedications).Methods("GET")
-	router.HandleFunc("/api/{UserID}/medications", middleware.CreateMedication).Methods("POST")
-	router.HandleFunc("/api/{UserID}/medications/{MedicationID}", middleware.DeleteMedication).Methods("DELETE")
-	router.HandleFunc("/api/{UserID}/medications/{MedicationID}", middleware.UpdateMedication).Methods("PUT")
+	router.GET("/api/:UserID/medications", handlers.GetMedications)
+	router.POST("/api/:UserID/medications", handlers.CreateMedication)
+	router.DELETE("/api/:UserID/medications/:MedicationID", handlers.DeleteMedication)
+	router.PUT("/api/:UserID/medications/:MedicationID", handlers.UpdateMedication)
 
 	// Blood Glucose Level Handler
-	router.HandleFunc("/api/{UserID}/glucoses", middleware.GetBloodGlucoseLevels).Methods("GET")
-	router.HandleFunc("/api/{UserID}/glucoses", middleware.CreateBloodGlucoseLevel).Methods("POST")
+	router.GET("/api/:UserID/glucoses", handlers.GetBloodGlucoseLevels)
+	router.POST("/api/:UserID/glucoses", handlers.CreateBloodGlucoseLevel)
 
 	// Scan Handler
-	router.HandleFunc("/api/{UserID}/scan", middleware.ScanFood).Methods("POST")
+	router.POST("/api/{UserID}/scan", handlers.ScanFood)
+}
 
-	return router
+func applyCorsMiddleware(router *gin.Engine) {
+	router.Use(middlewares.CorsMiddleware())
 }

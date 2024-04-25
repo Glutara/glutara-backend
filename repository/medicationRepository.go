@@ -129,7 +129,7 @@ func (*medicationRepo) Delete(userID int64, medicationID int64) error {
 	}
 
 	if len(doc) != 1 {
-		return errors.New("Medication log not found")
+		return errors.New("medication log not found")
 	}
 
 	_, err = client.Collection(config.MedicationCollection).Doc(doc[0].Ref.ID).Delete(ctx)
@@ -156,7 +156,7 @@ func (*medicationRepo) Update(userID int64, medicationID int64, newData *models.
 	}
 
 	if len(doc) != 1 {
-		return nil, errors.New("Medication log not found")
+		return nil, errors.New("medication log not found")
 	}
 
 	_, err = doc[0].Ref.Set(ctx, *newData)

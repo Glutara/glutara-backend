@@ -63,7 +63,7 @@ func (*userRepo) GetUserByEmail(email string) (*models.User, error) {
 	itr := client.Collection(config.UserCollection).Where("Email", "==", email).Documents(ctx)
 	doc, err := itr.Next()
 	if err == iterator.Done {
-		return nil, errors.New("User not found")
+		return nil, errors.New("user not found")
 	}
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ func (*userRepo) GetUserByID(userID int64) (*models.User, error) {
 	itr := client.Collection(config.UserCollection).Where("ID", "==", userID).Documents(ctx)
 	doc, err := itr.Next()
 	if err == iterator.Done {
-		return nil, errors.New("User not found")
+		return nil, errors.New("user not found")
 	}
 	if err != nil {
 		return nil, err

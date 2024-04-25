@@ -129,7 +129,7 @@ func (*exerciseRepo) Delete(userID int64, exerciseID int64) error {
 	}
 
 	if len(doc) != 1 {
-		return errors.New("Exercise log not found")
+		return errors.New("exercise log not found")
 	}
 
 	_, err = client.Collection(config.ExerciseCollection).Doc(doc[0].Ref.ID).Delete(ctx)
@@ -156,7 +156,7 @@ func (*exerciseRepo) Update(userID int64, exerciseID int64, newData *models.Exer
 	}
 
 	if len(doc) != 1 {
-		return nil, errors.New("Exercise log not found")
+		return nil, errors.New("exercise log not found")
 	}
 
 	_, err = doc[0].Ref.Set(ctx, *newData)
