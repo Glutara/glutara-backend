@@ -50,5 +50,8 @@ func Router() *mux.Router {
 	router.HandleFunc("/api/{UserID}/glucoses", middleware.GetBloodGlucoseLevels).Methods("GET")
 	router.HandleFunc("/api/{UserID}/glucoses", middleware.CreateBloodGlucoseLevel).Methods("POST")
 
+	// Scan Handler
+	router.HandleFunc("/api/{UserID}/scan", middleware.ScanFood).Methods("POST")
+
 	return router
 }
