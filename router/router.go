@@ -51,7 +51,7 @@ func ConfigureRouter(router *gin.Engine) {
 	router.POST("/api/:UserID/glucoses", handlers.CreateBloodGlucoseLevel)
 
 	// Scan Handler
-	router.POST("/api/{UserID}/scan", handlers.ScanFood)
+	router.POST("/api/:UserID/scan", handlers.ScanFood)
 }
 
 func applyCorsMiddleware(router *gin.Engine) {

@@ -1,146 +1,109 @@
 package handlers
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"fmt"
+	"io"
 	"net/http"
-	"os"
+	"net/url"
+	"strings"
+
+	"cloud.google.com/go/vertexai/genai"
+	"github.com/gin-gonic/gin"
 )
 
-type Candidate struct {
-	Content       Content `json:"content"`
-	SafetyRatings []SafetyRating `json:"safetyRatings"`
-	FinishReason  string `json:"finishReason,omitempty"`
-}
-
-type Content struct {
-	Role  string `json:"role"`
-	Parts []Part `json:"parts"`
-}
-
-type Part struct {
-	Text string `json:"text"`
-}
-
-type SafetyRating struct {
-	Category         string  `json:"category"`
-	Probability      string  `json:"probability"`
-	ProbabilityScore float64 `json:"probabilityScore"`
-	Severity         string  `json:"severity"`
-	SeverityScore    float64 `json:"severityScore"`
-}
-
-func ScanFood(response http.ResponseWriter, request *http.Request) {
-	// Parse JSON request body
+func ScanFood(c *gin.Context) {
 	var requestBody map[string]interface{}
-	err := json.NewDecoder(request.Body).Decode(&requestBody)
-	if err != nil {
-		http.Error(response, "Failed to parse JSON request body", http.StatusBadRequest)
+	if err := c.BindJSON(&requestBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse JSON request body"})
 		return
 	}
 
-	// Extract image URL from request body
 	imageURL, ok := requestBody["image_url"].(string)
 	if !ok {
-		http.Error(response, "Invalid image URL", http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid image URL"})
 		return
 	}
 
-	// Prepare request body
-	bodyData := map[string]interface{}{
-		"contents": map[string]interface{}{
-			"role": "user",
-			"parts": []map[string]interface{}{
-				{
-					"fileData": map[string]interface{}{
-						"mimeType": "image/jpeg",
-						"fileUri": imageURL,
-					},
-				},
-				{
-					"text": "Describe this picture.",
-				},
-			},
-		},
-		"safety_settings": map[string]interface{}{
-			"category":  "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-			"threshold": "BLOCK_LOW_AND_ABOVE",
-		},
-		"generation_config": map[string]interface{}{
-			"temperature":      0.4,
-			"topP":             1.0,
-			"topK":             32,
-			"maxOutputTokens":  2048,
-		},
-	}
+	projectID := "upheld-acumen-420202"
+	location := "us-central1"
+	modelName := "gemini-1.0-pro-vision"
+	temperature := 0.4
 
-	fmt.Println(bodyData)
-	requestBodyBytes, err := json.Marshal(bodyData)
+	// construct this multimodal prompt:
+	newImage, err := partFromImageURL(imageURL)
 	if err != nil {
-		http.Error(response, "Failed to marshal request body", http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read image"})
 		return
 	}
 
-	// Create HTTP request
-	fmt.Println(requestBodyBytes)
-	url := os.Getenv("GEMINI_MODEL")
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBodyBytes))
+	// create a multimodal (multipart) prompt
+	prompt := []genai.Part{
+		genai.Text("Describe this picture."),
+		newImage,
+	}
+
+	// generate the response
+	response, err := generateMultimodalContent(prompt, projectID, location, modelName, float32(temperature))
 	if err != nil {
-		http.Error(response, "Failed to create request", http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to generate response: %v", err)})
 		return
 	}
 
-	// Set authorization header from .env
-	fmt.Println(req)
-	bearerToken := os.Getenv("BEARER_TOKEN")
-	if bearerToken == "" {
-		http.Error(response, "BEARER_TOKEN is not set", http.StatusInternalServerError)
-		return
-	}
+	c.JSON(http.StatusOK, gin.H{"response": response})
+}
 
-	fmt.Println(bearerToken)
-	req.Header.Set("Authorization", "Bearer "+bearerToken)
-	req.Header.Set("Content-Type", "application/json")
+// generateMultimodalContent provide a generated response using multimodal input
+func generateMultimodalContent(parts []genai.Part, projectID, location, modelName string, temperature float32) (any, error) {
+	ctx := context.Background()
 
-	// Send request
-	client := &http.Client{}
-	res, err := client.Do(req)
+	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		http.Error(response, "Failed to send request", http.StatusInternalServerError)
-		return
+		return "", err
 	}
-	fmt.Println(res)
-	fmt.Println(res.Body)
+	defer client.Close()
+
+	model := client.GenerativeModel(modelName)
+	model.SetTemperature(temperature)
+
+	res, err := model.GenerateContent(ctx, parts...)
+	if err != nil {
+		return "", fmt.Errorf("unable to generate contents: %v", err)
+	}
+
+	// Check if there are any parts in the response
+	if len(res.Candidates) == 0 || len(res.Candidates[0].Content.Parts) == 0 {
+		return "", fmt.Errorf("generated response contains no content")
+	}
+
+	// Return the first part of the content
+	return res.Candidates[0].Content.Parts[0], nil
+}
+
+// partFromImageURL create a multimodal prompt part from an image URL
+func partFromImageURL(image string) (genai.Part, error) {
+	var img genai.Blob
+
+	imageURL, err := url.Parse(image)
+	if err != nil {
+		return img, err
+	}
+	res, err := http.Get(image)
+	if err != nil || res.StatusCode != 200 {
+		return img, err
+	}
 	defer res.Body.Close()
-
-	// Read response
-	var candidates []Candidate
-	err = json.NewDecoder(res.Body).Decode(&candidates)
+	data, err := io.ReadAll(res.Body)
 	if err != nil {
-		http.Error(response, "Failed to decode response", http.StatusInternalServerError)
-		return
+		return img, fmt.Errorf("unable to read from http: %v", err)
 	}
 
-	// Extract text values from parts
-	var textValues []string
-	for _, candidate := range candidates {
-		for _, part := range candidate.Content.Parts {
-			fmt.Println(part)
-			textValues = append(textValues, part.Text)
-		}
+	position := strings.LastIndex(imageURL.Path, ".")
+	if position == -1 {
+		return img, fmt.Errorf("couldn't find a period to indicate a file extension")
 	}
+	ext := imageURL.Path[position+1:]
 
-	// Marshal text values to JSON
-	textJSON, err := json.Marshal(textValues)
-	if err != nil {
-		http.Error(response, "Failed to marshal text values", http.StatusInternalServerError)
-		return
-	}
-
-	// Forward text values to client
-	response.Header().Set("Content-Type", "application/json")
-	response.WriteHeader(http.StatusOK)
-	fmt.Println(candidates)
-	response.Write(textJSON)
+	img = genai.ImageData(ext, data)
+	return img, nil
 }

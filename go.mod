@@ -2,8 +2,6 @@ module glutara
 
 go 1.21
 
-toolchain go1.22.2
-
 require cloud.google.com/go/vertexai v0.7.1
 
 require (
