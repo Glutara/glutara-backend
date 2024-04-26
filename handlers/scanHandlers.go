@@ -6,6 +6,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"regexp"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -45,13 +46,47 @@ func ScanFood(c *gin.Context) {
 	}
 
 	// generate the response
-	response, err := generateMultimodalContent(prompt, projectID, location, modelName, float32(temperature))
+	responseAny, err := generateMultimodalContent(prompt, projectID, location, modelName, float32(temperature))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to generate response: %v", err)})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"response": response})
+	// Convert responseAny to string
+	response := fmt.Sprintf("%v", responseAny)
+
+	// Define regex patterns
+	patterns := map[string]string{
+		"foodname":    `'foodname':\s*'([^']+)`,
+		"calories":    `'calories':\s*(\d+)`,
+		"carbohydrate": `'carbohydrate':\s*(\d+)`,
+		"protein":     `'protein':\s*(\d+)`,
+		"fat":         `'fat':\s*(\d+)`,
+		"fiber":       `'fiber':\s*(\d+)`,
+		"glucose":     `'glucose':\s*(\d+)`,
+	}
+
+	// Parse JSON fields using regex
+	foodname := findField(patterns["foodname"], response)
+	calories := findField(patterns["calories"], response)
+	carbs := findField(patterns["carbohydrate"], response)
+	protein := findField(patterns["protein"], response)
+	fat := findField(patterns["fat"], response)
+	fiber := findField(patterns["fiber"], response)
+	glucose := findField(patterns["glucose"], response)
+
+	// Create a Gin H map for JSON response
+	parsedResponse := gin.H{
+		"foodname":   foodname,
+		"calories":   calories,
+		"carbs":      carbs,
+		"protein":    protein,
+		"fat":        fat,
+		"fiber":      fiber,
+		"glucose":    glucose,
+	}
+
+	c.JSON(http.StatusOK, parsedResponse)
 }
 
 // Upload image to Google Cloud Storage and return the URI
@@ -69,8 +104,8 @@ func uploadImageToGCS(c *gin.Context, file multipart.File) (string, error) {
 	bucket := client.Bucket("glutara-scan")
 
 	// Generate object name with current date and time
-    currentTime := time.Now().Format("2006-01-02_15:04:05") // Format as "YYYY-MM-DD_HH:MM:SS"
-    objectName := "images/" + currentTime + ".jpg"
+	currentTime := time.Now().Format("2006-01-02_15:04:05") // Format as "YYYY-MM-DD_HH:MM:SS"
+	objectName := "images/" + currentTime + ".jpg"
 
 	// Create a writer for uploading the file
 	wc := bucket.Object(objectName).NewWriter(ctx)
@@ -110,4 +145,14 @@ func generateMultimodalContent(parts []genai.Part, projectID, location, modelNam
 
 	// Return the first part of the content
 	return res.Candidates[0].Content.Parts[0], nil
+}
+
+// Function to find a field using a regex pattern
+func findField(pattern string, text string) string {
+	re := regexp.MustCompile(pattern)
+	match := re.FindStringSubmatch(text)
+	if len(match) < 2 {
+		return ""
+	}
+	return match[1]
 }
