@@ -28,8 +28,9 @@ WORKDIR /app
 # Copy the built binary from the build stage to the final stage
 COPY --from=build /go/src/app/go-app .
 
-# Copy the .env file from the build context into the container
+# Copy the .env and default credentials file from the build context into the container
 COPY .env .
+COPY application_default_credentials.json .
 
 # Set the PORT environment variable to 8080
 ENV PORT=8080

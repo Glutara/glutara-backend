@@ -4,24 +4,29 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
-	"net/url"
-	"strings"
+	"time"
 
+	"cloud.google.com/go/storage"
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/api/option"
+	"google.golang.org/appengine"
 )
 
 func ScanFood(c *gin.Context) {
-	var requestBody map[string]interface{}
-	if err := c.BindJSON(&requestBody); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse JSON request body"})
+	file, _, err := c.Request.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to get image from request: %v", err)})
 		return
 	}
+	defer file.Close()
 
-	imageURL, ok := requestBody["image_url"].(string)
-	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid image URL"})
+	// Upload image to GCS
+	gcsURI, err := uploadImageToGCS(c, file)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to upload image to GCS: %v", err)})
 		return
 	}
 
@@ -30,17 +35,13 @@ func ScanFood(c *gin.Context) {
 	modelName := "gemini-1.0-pro-vision"
 	temperature := 0.4
 
-	// construct this multimodal prompt:
-	newImage, err := partFromImageURL(imageURL)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read image"})
-		return
-	}
-
 	// create a multimodal (multipart) prompt
 	prompt := []genai.Part{
-		genai.Text("Describe this picture."),
-		newImage,
+		genai.Text("For the given image, return a JSON object that has the fields foodname, calories, carbohydrate, protein, fat, fiber, and glucose with the value being the approximate value (integer) in gram (or cal for calories). Just output the JSON object without explanation or description. example output: { 'foodname': 'spaghetti', 'calories': 300, 'carbs': 20, 'protein': 10, 'fat': 13, 'fiber': 2, 'glucose': 2 }."),
+		genai.FileData{
+			MIMEType: "image/jpeg",
+			FileURI:  gcsURI, // Use the URI obtained from GCS
+		},
 	}
 
 	// generate the response
@@ -51,6 +52,37 @@ func ScanFood(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"response": response})
+}
+
+// Upload image to Google Cloud Storage and return the URI
+func uploadImageToGCS(c *gin.Context, file multipart.File) (string, error) {
+	ctx := appengine.NewContext(c.Request)
+
+	// Create a Google Cloud Storage client
+	client, err := storage.NewClient(ctx, option.WithCredentialsFile("application_default_credentials.json"))
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+
+	// Get a bucket handle
+	bucket := client.Bucket("glutara-scan")
+
+	// Generate object name with current date and time
+    currentTime := time.Now().Format("2006-01-02_15:04:05") // Format as "YYYY-MM-DD_HH:MM:SS"
+    objectName := "images/" + currentTime + ".jpg"
+
+	// Create a writer for uploading the file
+	wc := bucket.Object(objectName).NewWriter(ctx)
+	defer wc.Close()
+
+	// Copy the file data to the GCS object
+	if _, err := io.Copy(wc, file); err != nil {
+		return "", err
+	}
+
+	// Return the URI of the uploaded file
+	return "gs://glutara-scan/" + objectName, nil
 }
 
 // generateMultimodalContent provide a generated response using multimodal input
@@ -78,32 +110,4 @@ func generateMultimodalContent(parts []genai.Part, projectID, location, modelNam
 
 	// Return the first part of the content
 	return res.Candidates[0].Content.Parts[0], nil
-}
-
-// partFromImageURL create a multimodal prompt part from an image URL
-func partFromImageURL(image string) (genai.Part, error) {
-	var img genai.Blob
-
-	imageURL, err := url.Parse(image)
-	if err != nil {
-		return img, err
-	}
-	res, err := http.Get(image)
-	if err != nil || res.StatusCode != 200 {
-		return img, err
-	}
-	defer res.Body.Close()
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		return img, fmt.Errorf("unable to read from http: %v", err)
-	}
-
-	position := strings.LastIndex(imageURL.Path, ".")
-	if position == -1 {
-		return img, fmt.Errorf("couldn't find a period to indicate a file extension")
-	}
-	ext := imageURL.Path[position+1:]
-
-	img = genai.ImageData(ext, data)
-	return img, nil
 }
