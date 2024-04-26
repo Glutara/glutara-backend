@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -19,7 +20,7 @@ func GetSleeps(c *gin.Context) {
 
 	sleeps, err := repository.SleepRepo.FindAllUserSleeps(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to retrieve data"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve data: %v", err)})
 		return
 	}
 
