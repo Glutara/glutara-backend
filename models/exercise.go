@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+type ExerciseLog struct {
+	Type		string		`json:"Type"`
+	Data 		Exercise 	`json:"Data"`
+}
+
 type Exercise struct {
 	UserID			int64		`json:"UserID"`
 	ExerciseID		int64		`json:"ExerciseID"`

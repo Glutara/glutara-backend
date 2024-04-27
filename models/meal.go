@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+type MealLog struct {
+	Type		string		`json:"Type"`
+	Data 		Meal 		`json:"Data"`
+}
+
 type Meal struct {
 	UserID			int64		`json:"UserID"`
 	MealID			int64		`json:"MealID"`

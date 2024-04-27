@@ -50,6 +50,9 @@ func ConfigureRouter(router *gin.Engine) {
 	router.GET("/api/:UserID/glucoses", handlers.GetBloodGlucoseLevels)
 	router.POST("/api/:UserID/glucoses", handlers.CreateBloodGlucoseLevel)
 
+	// User Logs Handler
+	router.GET("/api/:UserID/logs", handlers.GetLogs)
+	
 	// Scan Handler
 	router.POST("/api/:UserID/scan", handlers.ScanFood)
 }
