@@ -2,15 +2,17 @@ package repository
 
 import (
 	"context"
+	"time"
+
+	"glutara/config"
+	"glutara/models"
 
 	"cloud.google.com/go/firestore"
 	"google.golang.org/api/iterator"
-	"glutara/models"
-	"glutara/config"
 )
 
 type BloodGlucoseLevelRepository interface {
-	FindAllUserBloodGlucoseLevels(int64) ([]models.BloodGlucoseLevel, error)
+	FindAllUserBloodGlucoseLevels(int64, bool, time.Time) ([]models.BloodGlucoseLevel, error)
 	Save(*models.BloodGlucoseLevel) (*models.BloodGlucoseLevel, error)
 	GetUserBloodGlucoseLevelsMaxCount(int64) (int64, error)
 }
@@ -21,7 +23,7 @@ func NewBloodGlucoseLevelRepository() BloodGlucoseLevelRepository {
 	return &bloodGlucoseLevelRepo{}
 }
 
-func (*bloodGlucoseLevelRepo) FindAllUserBloodGlucoseLevels(userID int64) ([]models.BloodGlucoseLevel, error) {
+func (*bloodGlucoseLevelRepo) FindAllUserBloodGlucoseLevels(userID int64, isInterval bool, timeThreshold time.Time) ([]models.BloodGlucoseLevel, error) {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
@@ -33,7 +35,12 @@ func (*bloodGlucoseLevelRepo) FindAllUserBloodGlucoseLevels(userID int64) ([]mod
 	var bloodGlucoseLevels []models.BloodGlucoseLevel
 	var bloodGlucoseLevel models.BloodGlucoseLevel
 
-	itr := client.Collection(config.BloodGlucoseLevelCollection).Where("UserID", "==", userID).Documents(ctx)
+	var itr *firestore.DocumentIterator
+	if !isInterval {
+		itr = client.Collection(config.BloodGlucoseLevelCollection).Where("UserID", "==", userID).Documents(ctx)
+	} else {
+		itr = client.Collection(config.BloodGlucoseLevelCollection).Where("UserID", "==", userID).Where("Time", ">=", timeThreshold).Documents(ctx)
+	}
 	for {
 		doc, err := itr.Next()
 		if err == iterator.Done {

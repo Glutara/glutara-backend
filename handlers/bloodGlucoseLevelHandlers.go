@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -20,7 +21,31 @@ func GetBloodGlucoseLevels(c * gin.Context) {
 		return
 	}
 
-	bloodGlucoseLevels, err := repository.BloodGlucoseLevelRepo.FindAllUserBloodGlucoseLevels(userID)
+	mode := c.Query("mode")
+	if mode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid request payload"})
+		return
+	}
+
+	var isInterval bool
+	timeThreshold := time.Now().UTC().Truncate(24 * time.Hour)
+	if mode == "all" {
+		isInterval = false
+	} else {
+		isInterval = true
+		if mode == "today" {
+			timeThreshold = timeThreshold.AddDate(0,0, 0)
+		} else if mode == "week" {
+			timeThreshold = timeThreshold.AddDate(0,0, -6)
+		} else if mode == "month" {
+			timeThreshold = timeThreshold.AddDate(0,0, -29)
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid request payload"})
+			return
+		}
+	}
+
+	bloodGlucoseLevels, err := repository.BloodGlucoseLevelRepo.FindAllUserBloodGlucoseLevels(userID, isInterval, timeThreshold)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to retrieve data"})
 		return
