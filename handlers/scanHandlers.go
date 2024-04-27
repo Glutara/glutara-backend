@@ -38,7 +38,7 @@ func ScanFood(c *gin.Context) {
 
 	// create a multimodal (multipart) prompt
 	prompt := []genai.Part{
-		genai.Text("For the given image, return a JSON object that has the fields foodname, calories, carbohydrate, protein, fat, fiber, and glucose with the value being the approximate value (integer) in gram (or cal for calories). Just output the JSON object without explanation or description. example output: { 'foodname': 'spaghetti', 'calories': 300, 'carbs': 20, 'protein': 10, 'fat': 13, 'fiber': 2, 'glucose': 2 }."),
+		genai.Text("For the given image, return a JSON object that has the fields foodname, calories, carbs, protein, fat, fiber, and glucose with the value being the approximate value (integer) in gram (or cal for calories). Just output the JSON object without explanation or description. example output: { 'foodname': 'spaghetti', 'calories': 300, 'carbs': 20, 'protein': 10, 'fat': 13, 'fiber': 2, 'glucose': 2 }."),
 		genai.FileData{
 			MIMEType: "image/jpeg",
 			FileURI:  gcsURI, // Use the URI obtained from GCS
@@ -59,7 +59,7 @@ func ScanFood(c *gin.Context) {
 	patterns := map[string]string{
 		"foodname":    `'foodname':\s*'([^']+)`,
 		"calories":    `'calories':\s*(\d+)`,
-		"carbohydrate": `'carbohydrate':\s*(\d+)`,
+		"carbs": 	   `'carbs':\s*(\d+)`,
 		"protein":     `'protein':\s*(\d+)`,
 		"fat":         `'fat':\s*(\d+)`,
 		"fiber":       `'fiber':\s*(\d+)`,
@@ -69,7 +69,7 @@ func ScanFood(c *gin.Context) {
 	// Parse JSON fields using regex
 	foodname := findField(patterns["foodname"], response)
 	calories := findField(patterns["calories"], response)
-	carbs := findField(patterns["carbohydrate"], response)
+	carbs := findField(patterns["carbs"], response)
 	protein := findField(patterns["protein"], response)
 	fat := findField(patterns["fat"], response)
 	fiber := findField(patterns["fiber"], response)
