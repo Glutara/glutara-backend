@@ -38,7 +38,7 @@ func ScanFood(c *gin.Context) {
 
 	// create a multimodal (multipart) prompt
 	prompt := []genai.Part{
-		genai.Text("For the given image, return a JSON object that has the fields foodname, calories, carbs, protein, fat, fiber, and glucose with the value being the approximate value (integer) in gram (or cal for calories). Just output the JSON object without explanation or description. example output: { 'foodname': 'spaghetti', 'calories': 300, 'carbs': 20, 'protein': 10, 'fat': 13, 'fiber': 2, 'glucose': 2 }. To make the result even more accurate, return the foodname with 'Unknown Food' if it is not a food or you don't know and set the rest value into '-'."),
+		genai.Text("For the given image, return a JSON object that has the fields foodname, calories, carbs, protein, fat, fiber, and glucose with the value being the approximate value (integer) in gram (or cal for calories). Just output the JSON object without explanation or description. example output: { 'foodname': 'spaghetti', 'calories': 300, 'carbs': 20, 'protein': 10, 'fat': 13, 'fiber': 2, 'glucose': 2 }. To make the result even more accurate, return the foodname with 'Unknown Food' if it is not a food or you don't know and set the rest value into 0."),
 		genai.FileData{
 			MIMEType: "image/jpeg",
 			FileURI:  gcsURI,
@@ -57,13 +57,13 @@ func ScanFood(c *gin.Context) {
 
 	// Define regex patterns
 	patterns := map[string]string{
-		"foodname":    `'foodname':\s*'([^']+)`,
-		"calories":    `'calories':\s*(\d+)`,
-		"carbs": 	   `'carbs':\s*(\d+)`,
-		"protein":     `'protein':\s*(\d+)`,
-		"fat":         `'fat':\s*(\d+)`,
-		"fiber":       `'fiber':\s*(\d+)`,
-		"glucose":     `'glucose':\s*(\d+)`,
+		"foodname": `'foodname':\s*'([^']+)`,
+		"calories": `'calories':\s*(\d+)`,
+		"carbs":    `'carbs':\s*(\d+)`,
+		"protein":  `'protein':\s*(\d+)`,
+		"fat":      `'fat':\s*(\d+)`,
+		"fiber":    `'fiber':\s*(\d+)`,
+		"glucose":  `'glucose':\s*(\d+)`,
 	}
 
 	// Parse JSON fields using regex
@@ -77,13 +77,13 @@ func ScanFood(c *gin.Context) {
 
 	// Create a Gin H map for JSON response
 	parsedResponse := gin.H{
-		"foodname":   foodname,
-		"calories":   calories,
-		"carbs":      carbs,
-		"protein":    protein,
-		"fat":        fat,
-		"fiber":      fiber,
-		"glucose":    glucose,
+		"foodname": foodname,
+		"calories": calories,
+		"carbs":    carbs,
+		"protein":  protein,
+		"fat":      fat,
+		"fiber":    fiber,
+		"glucose":  glucose,
 	}
 
 	c.JSON(http.StatusOK, parsedResponse)
