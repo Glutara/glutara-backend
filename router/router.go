@@ -54,6 +54,10 @@ func ConfigureRouter(router *gin.Engine) {
 	// User Logs Handler
 	router.GET("/api/:UserID/logs", handlers.GetLogs)
 
+	// Relation Handdler
+	router.GET("/api/:UserID/relations", handlers.GetRelations)
+	router.POST("/api/:UserID/relations", handlers.CreateRelation)
+
 	// Scan Handler
 	router.POST("/api/:UserID/scan", handlers.ScanFood)
 }

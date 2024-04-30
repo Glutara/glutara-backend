@@ -8,4 +8,5 @@ var (
 	MealRepo MealRepository = NewMealRepository()
 	SleepRepo SleepRepository = NewSleepRepository()
 	ExerciseRepo ExerciseRepository = NewExerciseRepository()
+	RelationRepo RelationRepository = NewRelationRepository()
 )
