@@ -76,3 +76,19 @@ func CreateRelation(c *gin.Context) {
 
 	c.JSON(http.StatusOK, relation)
 }
+
+func GetRelatedsInfo(c *gin.Context) {
+	userID, err := strconv.ParseInt(c.Param("UserID"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid request payload"})
+		return
+	}
+
+	relatedInfos, err := repository.RelationRepo.GetAllUserRelatedInfos(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to retrieve data"})
+		return
+	}
+
+	c.JSON(http.StatusOK, relatedInfos)
+}

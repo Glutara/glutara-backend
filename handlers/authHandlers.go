@@ -46,6 +46,7 @@ func Register(c *gin.Context) {
 		return
 	}
 	user.Password = string(hashedPassword)
+	user.LatestBloodGlucose = float32(0.0)
 
 	_, err = repository.UserRepo.Save(&user)
 	if err != nil {

@@ -10,3 +10,16 @@ type Relation struct {
 	Longitude			float64	`json:"Longitude"`
 	Latitude			float64	`json:"Latitude"`
 }
+
+type Related struct {
+	UserID				int64	`json:"UserID"`
+	Name				string	`json:"Name"`
+	Phone 				string	`json:"Phone"`
+}
+
+type RelatedInfo struct {
+	UserID				int64	`json:"UserID"`
+	Name				string	`json:"Name"`
+	Phone 				string	`json:"Phone"`
+	LatestBloodGlucose 	float32	`json:"LatestBloodGlucose"`
+}

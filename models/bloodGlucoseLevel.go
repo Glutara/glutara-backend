@@ -17,7 +17,7 @@ type InferenceReqToken struct {
 }
 
 type PredictionResToken struct {
-	Predictions []float32 `json:"predictions"`
+	Predictions [][]float32 `json:"predictions"`
 }
 
 type GraphicToken struct {

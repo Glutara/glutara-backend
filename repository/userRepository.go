@@ -4,17 +4,19 @@ import (
 	"context"
 	"errors"
 
+	"glutara/config"
+	"glutara/models"
+
 	"cloud.google.com/go/firestore"
 	"google.golang.org/api/iterator"
-	"glutara/models"
-	"glutara/config"
 )
 
 type UserRepository interface {
 	Save(*models.User) (*models.User, error)
 	GetUserByEmail(string) (*models.User, error)
 	GetUserByID(int64) (*models.User, error)
-	GetUserCount() (int64, error)	
+	GetUserCount() (int64, error)
+	UpdateLatestBloodGlucose(int64, float32) (error)
 }
 
 type userRepo struct{}
@@ -40,6 +42,7 @@ func (*userRepo) Save(user *models.User) (*models.User, error) {
 		"Name":		user.Name,
 		"Role":		user.Role,
 		"Phone":	user.Phone,
+		"LatestBloodGlucose":	user.LatestBloodGlucose,
 	})
 
 	if err != nil {
@@ -127,4 +130,28 @@ func (*userRepo) GetUserCount() (int64, error) {
 	}
 
 	return count, nil
+}
+
+func (*userRepo) UpdateLatestBloodGlucose(userID int64, prediction float32) (error) {
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, config.ProjectID)
+
+	if err != nil {
+		return err
+	}
+
+	defer client.Close()
+
+	itr := client.Collection(config.UserCollection).Where("ID", "==", userID).Documents(ctx)
+	doc, err := itr.Next()
+	if err != nil {
+		return err
+	}
+
+	_, err = doc.Ref.Update(ctx, []firestore.Update{{Path: "LatestBloodGlucose", Value: prediction}})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

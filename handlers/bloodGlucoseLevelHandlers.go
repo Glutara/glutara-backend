@@ -157,6 +157,12 @@ func CreateBloodGlucoseLevel(c *gin.Context) {
 		return
 	}
 
+	err = repository.UserRepo.UpdateLatestBloodGlucose(userID, prediction)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, bloodGlucoseLevel)
 }
 
@@ -192,5 +198,5 @@ func GetPrediction(input float32) (float32, error) {
 		return 0, err
 	}
 
-	return responseData.Predictions[0], nil
+	return responseData.Predictions[0][0], nil
 }
