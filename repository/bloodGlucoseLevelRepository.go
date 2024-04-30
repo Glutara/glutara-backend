@@ -12,7 +12,7 @@ import (
 )
 
 type BloodGlucoseLevelRepository interface {
-	FindAllUserBloodGlucoseLevels(int64, bool, time.Time) ([]models.BloodGlucoseLevel, error)
+	FindUserBloodGlucoseGraphicDataByDate(int64, time.Time) ([]models.GraphicData, error)
 	Save(*models.BloodGlucoseLevel) (*models.BloodGlucoseLevel, error)
 	GetUserBloodGlucoseLevelsMaxCount(int64) (int64, error)
 }
@@ -23,7 +23,7 @@ func NewBloodGlucoseLevelRepository() BloodGlucoseLevelRepository {
 	return &bloodGlucoseLevelRepo{}
 }
 
-func (*bloodGlucoseLevelRepo) FindAllUserBloodGlucoseLevels(userID int64, isInterval bool, timeThreshold time.Time) ([]models.BloodGlucoseLevel, error) {
+func (*bloodGlucoseLevelRepo) FindUserBloodGlucoseGraphicDataByDate(userID int64, date time.Time) ([]models.GraphicData, error) {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, config.ProjectID)
 
@@ -32,15 +32,11 @@ func (*bloodGlucoseLevelRepo) FindAllUserBloodGlucoseLevels(userID int64, isInte
 	}
 
 	defer client.Close()
-	var bloodGlucoseLevels []models.BloodGlucoseLevel
-	var bloodGlucoseLevel models.BloodGlucoseLevel
+	var glucoseGraphicDatas []models.GraphicData
+	var glucoseGraphicData models.GraphicData
+	nextDay := date.AddDate(0, 0, 1)
 
-	var itr *firestore.DocumentIterator
-	if !isInterval {
-		itr = client.Collection(config.BloodGlucoseLevelCollection).Where("UserID", "==", userID).Documents(ctx)
-	} else {
-		itr = client.Collection(config.BloodGlucoseLevelCollection).Where("UserID", "==", userID).Where("Time", ">=", timeThreshold).Documents(ctx)
-	}
+	itr := client.Collection(config.BloodGlucoseLevelCollection).Where("UserID", "==", userID).Where("Time", ">=", date).Where("Time", "<", nextDay).Select("Prediction", "Time").Documents(ctx)
 	for {
 		doc, err := itr.Next()
 		if err == iterator.Done {
@@ -50,14 +46,14 @@ func (*bloodGlucoseLevelRepo) FindAllUserBloodGlucoseLevels(userID int64, isInte
 			return nil, err
 		}
 
-		if err := doc.DataTo(&bloodGlucoseLevel); err != nil {
+		if err := doc.DataTo(&glucoseGraphicData); err != nil {
 			return nil, err
 		}
 
-		bloodGlucoseLevels = append(bloodGlucoseLevels, bloodGlucoseLevel)
+		glucoseGraphicDatas = append(glucoseGraphicDatas, glucoseGraphicData)
 	}
 
-	return bloodGlucoseLevels, nil
+	return glucoseGraphicDatas, nil
 }
 
 func (*bloodGlucoseLevelRepo) Save(bloodGlucoseLevel *models.BloodGlucoseLevel) (*models.BloodGlucoseLevel, error) {
@@ -71,11 +67,11 @@ func (*bloodGlucoseLevelRepo) Save(bloodGlucoseLevel *models.BloodGlucoseLevel) 
 	defer client.Close()
 
 	_, _, err = client.Collection(config.BloodGlucoseLevelCollection).Add(ctx, map[string]interface{}{
-		"UserID":				bloodGlucoseLevel.UserID,
-		"BloodGlucoseLevelID":	bloodGlucoseLevel.BloodGlucoseLevelID,
-		"Input":				bloodGlucoseLevel.Input,
-		"Prediction":			bloodGlucoseLevel.Prediction,
-		"Time": 				bloodGlucoseLevel.Time,
+		"UserID":              bloodGlucoseLevel.UserID,
+		"BloodGlucoseLevelID": bloodGlucoseLevel.BloodGlucoseLevelID,
+		"Input":               bloodGlucoseLevel.Input,
+		"Prediction":          bloodGlucoseLevel.Prediction,
+		"Time":                bloodGlucoseLevel.Time,
 	})
 
 	if err != nil {
@@ -105,7 +101,7 @@ func (*bloodGlucoseLevelRepo) GetUserBloodGlucoseLevelsMaxCount(userID int64) (i
 		if err != nil {
 			return 0, err
 		}
-		
+
 		if maxID < doc.Data()["BloodGlucoseLevelID"].(int64) {
 			maxID = doc.Data()["BloodGlucoseLevelID"].(int64)
 		}

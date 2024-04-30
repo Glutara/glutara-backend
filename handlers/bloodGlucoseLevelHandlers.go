@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -14,47 +13,37 @@ import (
 	"glutara/repository"
 )
 
-func GetBloodGlucoseLevels(c * gin.Context) {
+func GetBloodGlucoseGraphic(c *gin.Context) {
+	var graphicToken models.GraphicToken
+
 	userID, err := strconv.ParseInt(c.Param("UserID"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid request payload"})
 		return
 	}
 
-	mode := c.Query("mode")
-	if mode == "" {
+	err = c.BindJSON(&graphicToken)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid request payload"})
 		return
 	}
 
-	var isInterval bool
-	timeThreshold := time.Now().UTC().Truncate(24 * time.Hour)
-	if mode == "all" {
-		isInterval = false
-	} else {
-		isInterval = true
-		if mode == "today" {
-			timeThreshold = timeThreshold.AddDate(0,0, 0)
-		} else if mode == "week" {
-			timeThreshold = timeThreshold.AddDate(0,0, -6)
-		} else if mode == "month" {
-			timeThreshold = timeThreshold.AddDate(0,0, -29)
-		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid request payload"})
-			return
-		}
-	}
-
-	bloodGlucoseLevels, err := repository.BloodGlucoseLevelRepo.FindAllUserBloodGlucoseLevels(userID, isInterval, timeThreshold)
+	glucoseGraphicDatas, err := repository.BloodGlucoseLevelRepo.FindUserBloodGlucoseGraphicDataByDate(userID, graphicToken.Date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to retrieve data"})
 		return
 	}
 
-	c.JSON(http.StatusOK, bloodGlucoseLevels)
+	if glucoseGraphicDatas != nil {
+		c.JSON(http.StatusOK, glucoseGraphicDatas)
+		return
+	} else {
+		c.JSON(http.StatusOK, []models.GraphicData{})
+		return
+	}
 }
 
-func CreateBloodGlucoseLevel(c * gin.Context) {
+func CreateBloodGlucoseLevel(c *gin.Context) {
 	var bloodGlucoseLevel models.BloodGlucoseLevel
 
 	userID, err := strconv.ParseInt(c.Param("UserID"), 10, 64)
