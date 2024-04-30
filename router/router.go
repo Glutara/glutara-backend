@@ -48,6 +48,7 @@ func ConfigureRouter(router *gin.Engine) {
 
 	// Blood Glucose Level Handler
 	router.GET("/api/:UserID/glucoses/info/graphic", handlers.GetBloodGlucoseGraphic)
+	router.GET("/api/:UserID/glucoses/info/average", handlers.GetBloodGlucoseAverage)
 	router.POST("/api/:UserID/glucoses", handlers.CreateBloodGlucoseLevel)
 
 	// User Logs Handler

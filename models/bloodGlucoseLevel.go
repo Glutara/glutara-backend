@@ -28,3 +28,9 @@ type GraphicData struct {
 	Prediction				float32		`json:"Prediction"`
 	Time					time.Time	`json:"Time"`
 }
+
+type AverageGlucoseLevel struct {
+	Today	float32		`json:"Today"`
+	Week	float32		`json:"Week"`
+	Month	float32		`json:"Month"`
+}

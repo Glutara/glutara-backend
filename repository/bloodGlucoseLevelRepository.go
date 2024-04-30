@@ -13,6 +13,7 @@ import (
 
 type BloodGlucoseLevelRepository interface {
 	FindUserBloodGlucoseGraphicDataByDate(int64, time.Time) ([]models.GraphicData, error)
+	FindAllUserBloodGlucoseLevels(int64) ([]models.BloodGlucoseLevel, error)
 	Save(*models.BloodGlucoseLevel) (*models.BloodGlucoseLevel, error)
 	GetUserBloodGlucoseLevelsMaxCount(int64) (int64, error)
 }
@@ -54,6 +55,38 @@ func (*bloodGlucoseLevelRepo) FindUserBloodGlucoseGraphicDataByDate(userID int64
 	}
 
 	return glucoseGraphicDatas, nil
+}
+
+func (*bloodGlucoseLevelRepo) FindAllUserBloodGlucoseLevels(userID int64) ([]models.BloodGlucoseLevel, error) {
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, config.ProjectID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer client.Close()
+	var bloodGlucoseLevels []models.BloodGlucoseLevel
+	var bloodGlucoseLevel models.BloodGlucoseLevel
+
+	itr := client.Collection(config.BloodGlucoseLevelCollection).Where("UserID", "==", userID).Documents(ctx)
+	for {
+		doc, err := itr.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		if err := doc.DataTo(&bloodGlucoseLevel); err != nil {
+			return nil, err
+		}
+
+		bloodGlucoseLevels = append(bloodGlucoseLevels, bloodGlucoseLevel)
+	}
+
+	return bloodGlucoseLevels, nil
 }
 
 func (*bloodGlucoseLevelRepo) Save(bloodGlucoseLevel *models.BloodGlucoseLevel) (*models.BloodGlucoseLevel, error) {
