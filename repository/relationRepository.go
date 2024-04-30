@@ -33,9 +33,11 @@ func (*relationRepo) Save(relation *models.Relation) (*models.Relation, error) {
 
 	_, _, err = client.Collection(config.RelationCollection).Add(ctx, map[string]interface{}{
 		"UserID":     relation.UserID,
-		"RelationID": relation.RelationID,
 		"Name":       relation.Name,
 		"Phone":      relation.Phone,
+		"RelationID": relation.RelationID,
+		"RelationName": relation.RelationName,
+		"RelationPhone": relation.RelationPhone,
 		"Longitude":  relation.Longitude,
 		"Latitude":   relation.Latitude,
 	})
