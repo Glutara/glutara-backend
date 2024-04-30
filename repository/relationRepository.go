@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"glutara/config"
 	"glutara/models"
@@ -14,6 +15,7 @@ type RelationRepository interface {
 	Save(*models.Relation) (*models.Relation, error)
 	GetAllUserRelations(int64) ([]models.Relation, error)
 	GetAllUserRelatedInfos(int64) ([]models.RelatedInfo, error)
+	CheckRelationExist(int64, int64) (error)
 }
 
 type relationRepo struct{}
@@ -128,4 +130,25 @@ func (*relationRepo) GetAllUserRelatedInfos(relationID int64) ([]models.RelatedI
 	}
 
 	return relatedInfos, nil
+}
+
+func (*relationRepo) CheckRelationExist(userID int64, relationID int64) (error) {
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, config.ProjectID)
+
+	if err != nil {
+		return err
+	}
+
+	defer client.Close()
+
+	itr := client.Collection(config.RelationCollection).Where("UserID", "==", userID).Where("RelationID", "==", relationID).Documents(ctx)
+	_, err = itr.Next()
+	if err == iterator.Done {
+		return errors.New("relation not found")
+	}
+	if err != nil {
+		return err
+	}
+	return nil
 }

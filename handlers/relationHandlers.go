@@ -68,6 +68,17 @@ func CreateRelation(c *gin.Context) {
 		}
 	}
 
+	err = repository.RelationRepo.CheckRelationExist(relation.UserID, relation.RelationID)
+	if err != nil && err.Error() != "relation not found" {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to insert data"})
+		return
+	}
+	
+	if err == nil {
+		c.JSON(http.StatusConflict, gin.H{"Error": "Data already exist"})
+		return
+	} 
+
 	_, err = repository.RelationRepo.Save(&relation)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to insert data"})
