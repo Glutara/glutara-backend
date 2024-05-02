@@ -35,7 +35,6 @@ The silent maestro: Glutara's robust backend hums quietly behind the scenes, orc
 ## Getting Started
 Make sure you already do these things before running the code
 1. Install Go language on your computer
-2. Download the Firebase admin-sdk json file located [here](https://drive.google.com/file/d/18jmUb9Jbsv71MlGfDy0UBbCkTBL0Khf_/view?usp=sharing) to be able to connect to Firestore
 
 ## ⚙️ &nbsp;How to Run
 1. Clone this repository from terminal using this following command
@@ -43,16 +42,11 @@ Make sure you already do these things before running the code
     git clone https://github.com/Glutara/glutara-backend.git
     ```
 2. Create a .env file inside the repository directory using .env.example file as the template. You can keep the variables blank. The server should automatically use port 8080 as the default port and port 8605 as the model serving port
-3. Using Windows PowerShell, navigate to this repository directory
-4. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable using this following command
-    ``` bash
-    $env:GOOGLE_APPLICATION_CREDENTIALS="path/to/the/admin-sdk/json/file"
-    ```
-5. Run the server using this following command
+3. Run the server using this following command
     ``` bash
     go run main.go
     ```
-6. Glutara backend server should be running. You can also check the server by opening http://localhost:8080/api
+4. Glutara backend server should be running. You can also check the server by opening http://localhost:8080/api
     
 ## 🔑 &nbsp;List of Endpoints
 
@@ -80,8 +74,14 @@ Make sure you already do these things before running the code
 | /api/{UserID}/medications                  | POST     | Users can add a new medication log
 | /api/{UserID}/medications/{MedicationID}   | DELETE   | Users can delete existing medication log
 | /api/{UserID}/medications/{MedicationID}   | PUT      | Users can update existing medication log
-| /api/{UserID}/glucoses               | GET      | Users can see their blood glucose levels
+| /api/{UserID}/glucoses/info/graphic        | GET      | Users can see graphic of their blood glucose level fluctuation at a certain day
+| /api/{UserID}/glucoses/info/average        | GET      | Users can see the average value of their blood glucose level as of today, this week, and this month
 | /api/{UserID}/glucoses               | POST     | System can automatically predict and save user's blood glucose level
+| /api/{UserID}/logs                   | GET     | Users can view a comprehensive list of all their log activity
+| /api/{UserID}/relations              | GET     | Users with 'patient' role can see info and location of another user that is related to them
+| /api/{UserID}/relations              | POST    | Users with 'patient' role can add new user as their relative
+| /api/{UserID}/relations/related      | GET     | Users with 'relation' role can see info and current blood glucose level of another user with 'patient' role
+| /api/{UserID}/scan                   | POST    | Users can post picture of their food to know the name and nutritional value of that food
 
 ## 👥 &nbsp;Contributors
 
