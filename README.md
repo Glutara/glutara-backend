@@ -47,6 +47,7 @@ Make sure you already do these things before running the code
     go run main.go
     ```
 4. Glutara backend server should be running. You can also check the server by opening http://localhost:8080/api
+5. You could also check our deployed backend server by opening https://glutara-rest-api-reyoeq7kea-uc.a.run.app/api
     
 ## 🔑 &nbsp;List of Endpoints
 
