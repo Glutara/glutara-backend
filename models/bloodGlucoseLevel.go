@@ -20,10 +20,6 @@ type PredictionResToken struct {
 	Predictions [][]float32 `json:"predictions"`
 }
 
-type GraphicToken struct {
-	Date 	time.Time	`json:"Date"`
-}
-
 type GraphicData struct {
 	Prediction				float32		`json:"Prediction"`
 	Time					time.Time	`json:"Time"`

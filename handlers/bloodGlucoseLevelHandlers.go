@@ -16,21 +16,25 @@ import (
 )
 
 func GetBloodGlucoseGraphic(c *gin.Context) {
-	var graphicToken models.GraphicToken
-
 	userID, err := strconv.ParseInt(c.Param("UserID"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid request payload"})
 		return
 	}
 
-	err = c.BindJSON(&graphicToken)
+	dateStr := c.Query("date")
+	if dateStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid request payload"})
+		return
+	}
+
+	date, err := time.Parse(time.RFC3339, dateStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid request payload"})
 		return
 	}
 
-	glucoseGraphicDatas, err := repository.BloodGlucoseLevelRepo.FindUserBloodGlucoseGraphicDataByDate(userID, graphicToken.Date)
+	glucoseGraphicDatas, err := repository.BloodGlucoseLevelRepo.FindUserBloodGlucoseGraphicDataByDate(userID, date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to retrieve data"})
 		return
