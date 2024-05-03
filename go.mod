@@ -4,7 +4,10 @@ go 1.21
 
 require cloud.google.com/go/vertexai v0.7.1
 
-require github.com/google/uuid v1.6.0 // indirect
+require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	github.com/google/uuid v1.6.0 // indirect
+)
 
 require (
 	cloud.google.com/go v0.112.1 // indirect
