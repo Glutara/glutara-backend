@@ -76,12 +76,12 @@ Make sure you already do these things before running the code
 ## ⚙️ &nbsp;How to Run
 1. Clone this repository from terminal using this following command
     ``` bash
-    git clone https://github.com/Glutara/glutara-backend.git
+    $ git clone https://github.com/Glutara/glutara-backend.git
     ```
 2. Create a .env file inside the repository directory using .env.example file as the template. You can keep the variables blank. The server should automatically use port 8080 as the default port and port 8605 as the model serving port
 3. Run the server using this following command
     ``` bash
-    go run main.go
+    $ go run main.go
     ```
 4. Glutara backend server should be running. You can also check the server by opening http://localhost:8080/api
 5. You could also check our deployed backend server by opening https://glutara-rest-api-reyoeq7kea-uc.a.run.app/api
