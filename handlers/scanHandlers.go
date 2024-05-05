@@ -6,6 +6,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"regexp"
 	"time"
 
@@ -31,14 +32,14 @@ func ScanFood(c *gin.Context) {
 		return
 	}
 
-	projectID := "upheld-acumen-420202"
-	location := "us-central1"
-	modelName := "gemini-1.0-pro-vision"
+	projectID := os.Getenv("PROJECT_ID")
+	location := os.Getenv("LOCATION")
+	modelName := os.Getenv("MODEL_NAME")
 	temperature := 0.4
 
 	// create a multimodal (multipart) prompt
 	prompt := []genai.Part{
-		genai.Text("For the given image, return a JSON object that has the fields foodname, calories, carbs, protein, fat, fiber, and glucose with the value being the approximate value (integer) in gram (or cal for calories). Just output the JSON object without explanation or description. example output: { 'foodname': 'spaghetti', 'calories': 300, 'carbs': 20, 'protein': 10, 'fat': 13, 'fiber': 2, 'glucose': 2 }. To make the result even more accurate, return the foodname with 'Unknown Food' if it is not a food or you don't know and set the rest value into 0."),
+		genai.Text(os.Getenv("PROMPT_IMG")),
 		genai.FileData{
 			MIMEType: "image/jpeg",
 			FileURI:  gcsURI,
